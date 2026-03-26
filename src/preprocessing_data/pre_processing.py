@@ -106,14 +106,16 @@ class PreProcessor:
         
     def handle_missing_target_variable(self):
         """
-        Handles missing target variable.
-        If target variable is missing, the row is removed
+        Handles missing target variable(s).
+        If target variable(s) is/are missing, the row is removed.
 
         Returns:
             self.df: Dataframe
         """
         if "voted_up" in self.df.columns:
             self.df = self.df.dropna(subset=["voted_up"])
+        if "game" in self.df.columns:
+            self.df = self.df.dropna(subset=['game'])
         return self.df
     
     def handle_timestamps(self):
@@ -175,18 +177,122 @@ class PreProcessor:
         
         print(f"Training data saved to: {train_path}")
         print(f"Testing Data saved to: {test_path}")
-    """
-    Function to remove all non-English reviews. 
-    Can be removed if we end up using xlmr, 
-    otherwise uncomment
-        
+    
     def filter_english_reviews(self):
+        """
+        Function to remove all non-English reviews. 
+        Can be removed if we end up using xlmr, 
+        otherwise uncomment
+        """    
         if "language" in self.df.columns:
             self.df = self.df[self.df["language"] == "english"]
             
         return self.df
         
-    """
+    def summarize(self):
+        """
+        Function to print statistics about current dataframe.
+        """
+        print('-------------------------')
+
+        if self.df is None:
+            print("No data loaded yet.")
+            return
+
+        rows, cols = self.df.shape
+        print(f"Current Dataframe has {rows:,} rows and {cols} columns.")
+
+        #missing vals
+        missing = self.df.isnull().sum()
+        missing = missing[missing > 0]
+        if missing.empty:
+            print("No missing values found.")
+        else:
+            print(f"\nMissing values in {len(missing)} column(s):")
+            for col, count in missing.items():
+                print(f"  {col}: {count:,} ({count / rows * 100:.1f}% missing)")
+
+        #positive to negative ratio
+        if "voted_up" in self.df.columns:
+            counts = self.df["voted_up"].value_counts()
+            pos = counts.get(True, counts.get(1, counts.get(1.0, 0)))
+            neg = counts.get(False, counts.get(0, counts.get(0.0, 0)))
+            print(f"\n{pos:,} reviews are positive ({pos / rows * 100:.1f}%) and {neg:,} are negative ({neg / rows * 100:.1f}%).")
+
+        #playtime
+        if "author_playtime_forever" in self.df.columns:
+            pt = self.df["author_playtime_forever"]
+            print(f"\nOn average, authors have played for {pt.mean():,.0f} minutes (median: {pt.median():,.0f}, longest: {pt.max():,.0f}).")
+
+        if "author_playtime_at_review" in self.df.columns:
+            pt_review = self.df["author_playtime_at_review"]
+            print(f"At the time of writing, authors had played for {pt_review.mean():,.0f} minutes on average (median: {pt_review.median():,.0f}, longest: {pt_review.max():,.0f}).")
+
+        #review stats
+        if "review" in self.df.columns:
+            lengths = self.df["review"].dropna().str.split().str.len()
+            print(f"\nReviews are {lengths.mean():,.1f} words long on average (median: {lengths.median():,.0f}, longest: {lengths.max():,.0f} words).")
+
+        #review author stats
+        if "author_num_reviews" in self.df.columns:
+            print(f"\nAuthors have written {self.df['author_num_reviews'].mean():,.1f} reviews on average (median: {self.df['author_num_reviews'].median():,.0f}, most prolific: {self.df['author_num_reviews'].max():,.0f}).")
+
+        if "author_num_games_owned" in self.df.columns:
+            print(f"Authors own {self.df['author_num_games_owned'].mean():,.1f} games on average (median: {self.df['author_num_games_owned'].median():,.0f}, most: {self.df['author_num_games_owned'].max():,.0f}).")
+
+        #purchase flags
+        flags = {
+            "steam_purchase": "purchased on Steam",
+            "received_for_free": "received for free",
+            "written_during_early_access": "written during early access"
+        }
+        present_flags = {label: col for col, label in flags.items() if col in self.df.columns}
+        if present_flags:
+            print("\nOf the reviews in this dataframe:")
+            for label, col in present_flags.items():
+                count = int(self.df[col].sum())
+                print(f"  {count:,} ({count / rows * 100:.1f}%) were {label}.")
+
+        #games contained in set
+        if "game" in self.df.columns:
+            print(f"\nThe current dataframe covers {self.df['game'].nunique():,} unique game(s).")
+        
+        print('-------------------------')
+
+    def remove_duplicate_reviews(self):
+        """
+        Function to remove repeats reviews of the same game
+        from the same author. Will keep the first review.
+
+        Returns:
+            self.df: DataFrame
+        """
+        if "author_steamid" in self.df.columns and "timestamp_created" in self.df.columns and "game" in self.df.columns:
+            self.df = self.df.sort_values("timestamp_created", ascending=False)
+            self.df = self.df.drop_duplicates(subset=["author_steamid", "game"], keep="first")
+        return self.df
+
+    def remove_playtime_outliers(self, max_hours=30000):
+        if "author_playtime_forever" in self.df.columns:
+            self.df = self.df[self.df["author_playtime_forever"] <= max_hours * 60]
+        return self.df
+    
+    def clean_review_text(self):
+        """
+        Function to standardize review text for future tokenization.
+
+        Returns:
+            self.df: DataFrame
+        """
+        if "review" in self.df.columns:
+            #html
+            self.df["review"] = self.df["review"].str.replace(r"https?://\S+", "", regex=True)
+            self.df["review"] = self.df["review"].str.replace(r"\[.*?\]", "", regex=True)
+            #special chars
+            self.df["review"] = self.df["review"].str.replace(r"[^a-zA-Z0-9\s.,!?']", "", regex=True)
+            #whitespace
+            self.df["review"] = self.df["review"].str.strip().str.replace(r"\s+", " ", regex=True)
+        return self.df
     
     def preprocess(self, nrows=None):
         """
@@ -200,11 +306,16 @@ class PreProcessor:
         """
         self.load_data(nrows=nrows)
         self.remove_uninteresting_columns()
+        self.filter_english_reviews()
         self.remove_no_playtime()
+        self.remove_playtime_outliers()
+        self.remove_duplicate_reviews()
+        self.clean_review_text()
         self.remove_empty_reviews()
         self.handle_missing_numeric_values()
         self.handle_missing_target_variable()
         self.handle_timestamps()
+        self.summarize()
         
         return self.df
         
