@@ -1,8 +1,9 @@
 #IMPORTS
 import pandas as pd
-import numpy as np
+from sklearn.model_selection import train_test_split
 
-
+#CONSTANTS
+RANDOM_STATE = 42
 class PreProcessor:
     def __init__(self, filepath):
         self.filepath = filepath
@@ -134,6 +135,46 @@ class PreProcessor:
         self.df[valid_cols] = self.df[valid_cols].apply(pd.to_datetime, unit="s", errors="coerce")
         
         return self.df
+    
+    def split_data(self, test_size=0.2, random_state=RANDOM_STATE):
+        """
+        Creates Train and Test splits of the data. 
+
+        Args:
+            test_size: Defaults to 0.2.
+            random_state: Defaults to RANDOM_STATE.
+
+        Returns:
+            train_df: Dataframe of training data
+            test_df: Dataframe of testing data
+        """
+        train_df, test_df = train_test_split(
+            self.df,
+            test_size=test_size,
+            random_state=random_state,
+            
+            # Use stratify to preserve the class distribution of the target variable (voted_up)
+            # in both the training and test sets. Without this, random splitting could create
+            # imbalanced subsets (Ex. too many positive reviews), leading to unreliable
+            # evaluation metrics and unfair comparisons between models.
+            stratify=self.df["voted_up"]
+        )
+        
+        return train_df, test_df
+    
+    def save_data(self, train_df, test_df, train_path="src/data/processed/train.csv",test_path="src/data/processed/test.csv"):
+        """
+        Saves training and test data to src/data/processed"
+        """
+        if train_df is None or test_df is None:
+            print("Error: Train/test data is not present")
+            return
+        
+        train_df.to_csv(train_path, index=False)
+        test_df.to_csv(test_path, index=False)
+        
+        print(f"Training data saved to: {train_path}")
+        print(f"Testing Data saved to: {test_path}")
     """
     Function to remove all non-English reviews. 
     Can be removed if we end up using xlmr, 
