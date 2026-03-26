@@ -1,3 +1,24 @@
 # Abstract {.unnumbered}
 
-Type here the abstract of the project.
+ 
+The online gaming platform Steam allows players to post reviews indicating whether or not they 
+recommend a game. These reviews can provide a potential buyer with more information regarding others 
+satisfaction and engagement. For developers, understanding the factors that influence whether a player 
+recommends a game can help them gain insight into what their own game needs to be successful. This 
+project will investigate whether review characteristics can predict whether a player will recommend a 
+game.  
+The objective of this project is to build and evaluate machine learning models that predict 
+whether a steam review is marked as “recommended” based on player behaviour and review 
+characteristics. Player behaviours include total playtime, recent activity, and community engagement 
+metrics. In addition, the project will explore whether text-derived features from the review can improve 
+prediction accuracy or detect potentially misleading reviews. Such as a review which is sarcastic or has 
+negative undertones, but is officially marked as positive.  
+The methodology involves several machine learning techniques commonly used for classification 
+tasks. After preprocessing the dataset, Natural Language Processing (NLP) techniques will be applied to 
+review the text to extract numerical features, such as review length and sentiment scores, which aim to 
+capture the tone of the written review. These text-based features will be combined with behaviour 
+variables, such as total play time. The data will then be split into train and test sets. Multiple classification 
+models will be trained, and performance will be compared.  
+The dataset being used is the Steam Reviews dataset found on Kaggle. This dataset contains 
+millions of user reviews and associated behavioural features. The large size of the dataset will allow our 
+models to be trained on a large amount of real player feedback, increasing the reliability of the analysis.
