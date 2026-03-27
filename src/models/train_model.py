@@ -57,10 +57,10 @@ class BasicLogisticRegressionTraining:
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.model.fit(self.X_train, self.y_train)
         
-        os.makedirs("models", exist_ok=True)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
         
-        joblib.dump(self.model, 'models/logistic_model.pkl')
-        joblib.dump(self.scaler, 'models/scaler.pkl')
+        joblib.dump(self.model, f'{base_dir}/logistic_model.pkl')
+        joblib.dump(self.scaler, f'{base_dir}/scaler.pkl')
         
     def evaluate(self):
         """
