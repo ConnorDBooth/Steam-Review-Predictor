@@ -1,18 +1,20 @@
 
 #IMPORTS
 import joblib
+import os
 
 
 class BasicLogisticRegressionPredictor:
-    def __init__(self, model_path='models/logistic_model.pkl', scaler_path='models/scaler.pkl'):
+    def __init__(self):
         """
         Loads a pre-trained logistic regression model.
         Args:
             model_path (str, optional): Defaults to 'models/logistic_model.pkl'.
             scaler_path (str, optional): Defaults to 'models/scaler.pkl'.
         """
-        self.model = joblib.load(model_path)
-        self.scaler = joblib.load(scaler_path)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.model = joblib.load(f"{base_dir}/logistic_model.pkl")
+        self.scaler = joblib.load(f"{base_dir}/scaler.pkl")
         
     def predict(self, X):
         """
