@@ -3,15 +3,16 @@ import joblib
 import os
 import sklearn.linear_model as skl_lm
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import pandas as pd
 
 from feature_engineering.build_features import LogisticRegressionFeatureEngineering
-from models.predict_model import BasicLogisticRegressionPredictor
+from models.predict_model import BasicLogisticRegressionPredictor, BasicRandomForestPredictor
 
 
 class BasicLogisticRegressionTraining:
-    def __init__ (self, train_df, test_df):
+    def __init__ (self, train_df, test_df, feature_engineer=None):
         """
         Initialize the logistic regression model
         
@@ -22,13 +23,13 @@ class BasicLogisticRegressionTraining:
         self.train_df = train_df
         self.test_df = test_df
         self.scaler = StandardScaler()
-        self.feature_engineer = LogisticRegressionFeatureEngineering()
         #Placeholders
         self.X_train = None
         self.y_train = None
         self.X_test = None
         self.y_test = None
         self.y_pred = None
+        self.feature_engineer = feature_engineer or LogisticRegressionFeatureEngineering()
         
         #Model
         self.model = skl_lm.LogisticRegression(solver = "newton-cg",max_iter=1000,class_weight="balanced")
@@ -87,6 +88,77 @@ class BasicLogisticRegressionTraining:
         return metrics_dict
     
     def run_lr_pipeline(self):
+        self.set_features()
+        self.train()
+        return self.evaluate()
+
+class BasicRandomForestTraining:
+    def __init__(self, train_df, test_df, featureEng=None):
+        """
+        Initialize the Random Forest model.
+
+        Args:
+            train_df: Training dataframe
+            test_df: Testing dataframe
+        """
+        self.train_df = train_df
+        self.test_df = test_df
+        self.feature_engineer = featureEng or LogisticRegressionFeatureEngineering()
+        self.X_train = None
+        self.y_train = None
+        self.X_test = None
+        self.y_test = None
+        self.y_pred = None
+        self.model = RandomForestClassifier(
+            n_estimators=100,
+            max_depth=None,
+            class_weight="balanced",
+            random_state=42
+        )
+
+    def set_features(self):
+        """
+        Takes the set of features and target variable from
+        the "LogisticRegressionFeatureEngineering" class.
+        """
+        features = self.feature_engineer.feature_cols
+        target_variable = self.feature_engineer.target_col
+
+        self.X_train = self.train_df[features]
+        self.y_train = self.train_df[target_variable]
+        self.X_test = self.test_df[features]
+        self.y_test = self.test_df[target_variable]
+
+    def train(self):
+        """
+        Trains the Random Forest model and saves it to disk.
+        No scaling required since decision trees are not
+        sensitive to feature scale.
+        """
+        self.model.fit(self.X_train, self.y_train)
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        joblib.dump(self.model, f"{base_dir}/random_forest_model.pkl")
+
+    def evaluate(self):
+        """
+        Generates predictions and returns evaluation metrics.
+
+        Returns:
+            metrics_dict: A dictionary of the resulting metrics.
+        """
+        predictor = BasicRandomForestPredictor()
+        self.y_pred, _ = predictor.predict(self.X_test)
+        metrics_dict = {
+            "accuracy": accuracy_score(self.y_test, self.y_pred),
+            "precision": precision_score(self.y_test, self.y_pred),
+            "recall": recall_score(self.y_test, self.y_pred),
+            "f1_score": f1_score(self.y_test, self.y_pred),
+            "confusion_matrix": confusion_matrix(self.y_test, self.y_pred)
+        }
+        return metrics_dict
+
+    def run_rf_pipeline(self):
         self.set_features()
         self.train()
         return self.evaluate()

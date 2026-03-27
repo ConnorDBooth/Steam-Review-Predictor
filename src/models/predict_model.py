@@ -34,3 +34,28 @@ class BasicLogisticRegressionPredictor:
         
         return y_pred, y_pred_proba
     
+class BasicRandomForestPredictor:
+    def __init__(self):
+        """
+        Loads a pre-trained Random Forest model.
+        Args:
+            model_path (str, optional): Defaults to 'models/random_forest_model.pkl'.
+        """
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.model = joblib.load(f"{base_dir}/random_forest_model.pkl")
+
+    def predict(self, X):
+        """
+        Makes predictions based on the testing data.
+        No scaling required since Random Forest is not sensitive to feature scale.
+        
+        Args:
+            X: Features of model
+        Returns:
+            y_pred: Hard predictions
+            y_pred_proba: The confidence
+        """
+        y_pred = self.model.predict(X)
+        y_pred_proba = self.model.predict_proba(X)
+
+        return y_pred, y_pred_proba
