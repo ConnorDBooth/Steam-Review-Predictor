@@ -99,4 +99,38 @@ class LogisticRegressionFeatureEngineering:
         except FileNotFoundError as e :
             print(f"Error: could not load data: {e}")
             return None, None
-        
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+class TFIDFFeatureEngineering(LogisticRegressionFeatureEngineering):
+    def __init__(self, df=None, max_features=100):
+        super().__init__(df)
+        self.vectorizer = TfidfVectorizer(max_features=max_features, stop_words="english")
+        self.review_col = "review"
+
+    def build_tfidf_features(self):
+        """
+        Generates TF-IDF features from the review column and appends
+        them to the dataframe and feature_cols list.
+
+        Returns:
+            self.df: DataFrame with TF-IDF features added
+        """
+        if self.df is None:
+            print("Error: No dataframe provided")
+            return None
+
+        if self.review_col not in self.df.columns:
+            print(f"Error: '{self.review_col}' column not found")
+            return None
+
+        tfidf_matrix = self.vectorizer.fit_transform(self.df[self.review_col].fillna(""))
+        tfidf_df = pd.DataFrame(
+            tfidf_matrix.toarray(),
+            columns=[f"tfidf_{w}" for w in self.vectorizer.get_feature_names_out()],
+            index=self.df.index
+        )
+        self.df = pd.concat([self.df, tfidf_df], axis=1)
+        self.feature_cols = self.feature_cols + list(tfidf_df.columns)
+
+        return self.df
