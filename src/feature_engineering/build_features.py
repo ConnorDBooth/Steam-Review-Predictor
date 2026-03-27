@@ -4,8 +4,16 @@ from sklearn.model_selection import train_test_split
 
 #CONSTANTS
 RANDOM_STATE = 42
+
 class LogisticRegressionFeatureEngineering:
     def __init__(self, df=None):
+        """
+        Constructor for the "LogisticRegressionFeatureEngineering" class.
+        Accepts the raw dataframe and configures X and Y variables. 
+
+        Args:
+            df (_type_, optional): _description_. Defaults to None.
+        """
         self.df = df
         self.target_col = "voted_up"
         
@@ -59,7 +67,7 @@ class LogisticRegressionFeatureEngineering:
         )
         
         return train_df, test_df
-    #REMEMBER TO REMOVE FROM PREPROCESSING 
+    
     def save_data(self, train_df, test_df, train_path="src/data/processed/train.csv",test_path="src/data/processed/test.csv"):
         """
         Saves training and test data to src/data/processed"
