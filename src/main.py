@@ -7,9 +7,7 @@ from models.train_model import BasicLogisticRegressionTraining
 def main():
     processor = PreProcessor("src/data/raw/all_reviews.csv")
 
-    #Sticking with 100,000 right now for speed sake.
-    #Can be scaled up later
-    df = processor.preprocess(10000)
+    df = processor.preprocess(5000000)
     
     feature_builder = LogisticRegressionFeatureEngineering(df)
     train_df, test_df = feature_builder.split_data()

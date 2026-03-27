@@ -16,8 +16,8 @@ class BasicLogisticRegressionTraining:
         Initialize the logistic regression model
         
         Args:
-            train_path: Path to training dataset
-            test_path: Path to testing dataset
+            train_path: Path to training dataframe
+            test_path: Path to testing dataframe
         """
         self.train_df = train_df
         self.test_df = test_df
@@ -34,7 +34,10 @@ class BasicLogisticRegressionTraining:
         self.model = skl_lm.LogisticRegression(solver = "newton-cg",max_iter=1000,class_weight="balanced")
     
     def set_features(self):
-        
+        """
+        Takes the set of features and target variable from
+        the "LogisticRegressionFeatureEngineering" class
+        """
         features = self.feature_engineer.feature_cols
         target_variable = self.feature_engineer.target_col
         
@@ -42,10 +45,15 @@ class BasicLogisticRegressionTraining:
         self.y_train = self.train_df[target_variable]
         self.X_test = self.test_df[features]
         self.y_test = self.test_df[target_variable]
-        return None
     
     def train(self):
-        
+        """
+        Train the logistic regression model.
+        The scaler standardizes the features to fit the requirements of
+        logistic regression.
+        The model and scaler are then saved so they can be called upon later without the need
+        for retraining.
+        """
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.model.fit(self.X_train, self.y_train)
         
@@ -55,6 +63,15 @@ class BasicLogisticRegressionTraining:
         joblib.dump(self.scaler, 'models/scaler.pkl')
         
     def evaluate(self):
+        """
+        Creates a predictor object from "BasicLogisticRegressionPredictor".
+        Predictions are then generated and metrics accuracy, precision,
+        recall, f1_score, and a confusion matrix are printed to the 
+        console.
+
+        Returns:
+            metrics_dict: A dictionary of the resulting metrics. 
+        """
         predictor = BasicLogisticRegressionPredictor()
         
         self.y_pred, _ = predictor.predict(self.X_test)
