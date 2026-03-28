@@ -2,18 +2,20 @@
 from preprocessing_data.pre_processing import PreProcessor
 from feature_engineering.build_features import LogisticRegressionFeatureEngineering, TFIDFFeatureEngineering,LSTMFeatureEngineering
 from models.train_model import BasicLogisticRegressionTraining, BasicRandomForestTraining,LSTMTraining
-from visualization.visualize import LogisticRegressionVisualizer, RandomForestVisualizer, TFIDFVisualizer
+from visualization.visualize import LogisticRegressionVisualizer, RandomForestVisualizer, TFIDFVisualizer,LSTMVisualizer
 
 def main():
     processor = PreProcessor("src/data/raw/all_reviews.csv")
-    df = processor.preprocess(500000)
-    print(df["voted_up"].value_counts())
+    df = processor.preprocess(1000000)
     
     feature_builder = LogisticRegressionFeatureEngineering(df)
+    feature_builder.votes_ratio()
+    feature_builder.playtime_ratio()
+    feature_builder.review_length()
     base_train_df, base_test_df = feature_builder.split_data()
     feature_builder.save_data(base_train_df, base_test_df)
     
-    lr_trainer = BasicLogisticRegressionTraining(base_train_df, base_test_df)
+    lr_trainer = BasicLogisticRegressionTraining(base_train_df, base_test_df, feature_builder)
     lr_results = lr_trainer.run_lr_pipeline()
     
     print("\nLogistic Regression Results:")
@@ -22,7 +24,7 @@ def main():
     
     plot = LogisticRegressionVisualizer(lr_trainer.model, feature_builder.feature_cols)
     plot.plot_feature_importance()
-
+    """
     tfidf_builder = TFIDFFeatureEngineering(df, max_features=1000)
     tfidf_builder.build_tfidf_features()
     tfidf_train_df, tfidf_test_df = tfidf_builder.split_data()
@@ -60,5 +62,10 @@ def main():
     print("\nLSTM Results:")
     for k, v in lstm_results.items():
         print(f"{k}: {v}")
+        
+    lstm_plot = LSTMVisualizer(lstm_trainer.model, lstm_trainer.history, lstm_trainer.y_test, lstm_trainer.y_pred, lstm_trainer.y_pred_proba)
+    lstm_plot.plot_all()
+    
+    """
 if __name__ == "__main__":
     main()

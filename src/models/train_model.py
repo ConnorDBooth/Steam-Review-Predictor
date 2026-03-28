@@ -2,6 +2,7 @@
 import joblib
 import os
 import sklearn.linear_model as skl_lm
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
@@ -12,7 +13,7 @@ from feature_engineering.build_features import LogisticRegressionFeatureEngineer
 from models.predict_model import BasicLogisticRegressionPredictor, BasicRandomForestPredictor
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Embedding, LSTM, Dense 
+from tensorflow.keras.layers import Embedding, LSTM, Dense
 from sklearn.utils.class_weight import compute_class_weight
 from feature_engineering.build_features import LSTMFeatureEngineering
 
@@ -35,7 +36,7 @@ class BasicLogisticRegressionTraining:
         self.X_test = None
         self.y_test = None
         self.y_pred = None
-        self.feature_engineer = feature_engineer or LogisticRegressionFeatureEngineering()
+        self.feature_engineer = feature_engineer
         
         #Model
         self.model = skl_lm.LogisticRegression(solver = "newton-cg",max_iter=1000,class_weight="balanced")
@@ -52,7 +53,7 @@ class BasicLogisticRegressionTraining:
         self.y_train = self.train_df[target_variable]
         self.X_test = self.test_df[features]
         self.y_test = self.test_df[target_variable]
-    
+
     def train(self):
         """
         Train the logistic regression model.
@@ -60,7 +61,7 @@ class BasicLogisticRegressionTraining:
         logistic regression.
         The model and scaler are then saved so they can be called upon later without the need
         for retraining.
-        """
+        """ 
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.model.fit(self.X_train, self.y_train)
         
@@ -192,7 +193,9 @@ class LSTMTraining:
         self.y_train = None
         self.y_test = None
         self.y_pred = None
+        self.y_pred_proba = None
         self.model = None
+        self.history = None
         
     def build_model(self):
         """
@@ -234,8 +237,6 @@ class LSTMTraining:
         review imbalance. Penalizes the model more for misclassifying negatives.
         Then trains and saves the model
         """
-        
-    
         class_weight = compute_class_weight(
             class_weight="balanced",
             classes=np.unique(self.y_train),
@@ -243,7 +244,7 @@ class LSTMTraining:
         )
         class_weight_dict = dict(enumerate(class_weight))
         
-        self.model.fit(
+        self.history = self.model.fit(
             self.X_train, self.y_train,
             epochs = 10,
             batch_size = 32,
@@ -263,6 +264,7 @@ class LSTMTraining:
         """
 
         y_pred_proba = self.model.predict(self.X_test)
+        self.y_pred_proba = y_pred_proba
         self.y_pred = (y_pred_proba > 0.5).astype(int).flatten() 
         
         metrics_dict = {

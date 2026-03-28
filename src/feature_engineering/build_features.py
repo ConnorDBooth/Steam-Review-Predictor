@@ -39,7 +39,30 @@ class LogisticRegressionFeatureEngineering:
         ]
         self.train_path = None
         self.test_path = None
+    
+    def votes_ratio(self):
+        """
+        Creates a ratio based on the number of helpful votes a review has,
+        and the number of funny votes a review has
+        """
+        # +1 ensures we are not dividing by 0
+        self.df["votes_ratio"] = self.df["votes_up"] / (self.df["votes_up"] + self.df["votes_funny"] + 1)
+        self.feature_cols += ["votes_ratio"]
         
+    def playtime_ratio(self):
+        """
+        Creates a playtime ratio feature from "author_playtime_at_review"
+        and "author_playtime_forever" columns
+        """
+        self.df["playtime_ratio"] = self.df["author_playtime_at_review"] / (self.df["author_playtime_forever"])
+        self.feature_cols += ["playtime_ratio"]
+        
+    def review_length(self):
+        """
+        Adds review length as a numeric feature
+        """
+        self.df["review_length"] = self.df["review"].str.split().str.len()
+        self.feature_cols += ["review_length"]
     
     def split_data(self, test_size=0.2, random_state=RANDOM_STATE):
         """
