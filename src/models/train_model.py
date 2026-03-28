@@ -6,9 +6,15 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import pandas as pd
+import numpy as np
 
 from feature_engineering.build_features import LogisticRegressionFeatureEngineering
 from models.predict_model import BasicLogisticRegressionPredictor, BasicRandomForestPredictor
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense 
+from sklearn.utils.class_weight import compute_class_weight
+from feature_engineering.build_features import LSTMFeatureEngineering
 
 
 class BasicLogisticRegressionTraining:
@@ -160,5 +166,117 @@ class BasicRandomForestTraining:
 
     def run_rf_pipeline(self):
         self.set_features()
+        self.train()
+        return self.evaluate()
+    
+class LSTMTraining:
+    def __init__(self, train_df, test_df):
+        """
+        Initialize the LSTM model.
+
+        Args:
+            train_df: training dataframe, taken from LSTMFeatureEngineering
+            test_df: testing dataframe, taken from LSTMFeatureEngineering
+        """
+        self.train_df = train_df
+        self.test_df = test_df
+        self.feature_engineer = LSTMFeatureEngineering()
+        self.embedding_dim = 50 #The size of the vector used to represent each word
+        
+        # Size of the hidden state vector. 
+        # A higher value means the model can remember more complex patterns 
+        self.lstm_units = 32 
+        #Placeholders
+        self.X_train = None
+        self.X_test = None
+        self.y_train = None
+        self.y_test = None
+        self.y_pred = None
+        self.model = None
+        
+    def build_model(self):
+        """
+        Builds and compiles LSTM model.
+        Embedding layer learns word representations,
+        LSTM layer captures sequential context,
+        Dense layer with sigmoid activation is for binary classification
+        """
+        
+        self.model = Sequential([
+            Embedding(
+                input_dim=self.feature_engineer.max_words,
+                output_dim = self.embedding_dim,
+                input_length= self.feature_engineer.max_len
+            ),
+            LSTM(units=self.lstm_units),
+            Dense(1, activation="sigmoid")
+        ])
+        
+        self.model.compile(
+            loss="binary_crossentropy",
+            optimizer='adam',
+            metrics=['accuracy']
+        )
+        
+        print(self.model.summary())
+        
+    def set_features(self):
+        """
+        Runs tokenization and padding on the training and test set
+        by calling fit_transfrom from LSTMFeatureEngineering.
+        Populates X_train, X_test, y_train, y_test
+        """
+        self.X_train, self.X_test, self.y_train, self.y_test = self.feature_engineer.fit_transform(self.train_df, self.test_df)
+        
+    def train(self):
+        """
+        Computes balanced class weights to account for positve/negative
+        review imbalance. Penalizes the model more for misclassifying negatives.
+        Then trains and saves the model
+        """
+        
+    
+        class_weight = compute_class_weight(
+            class_weight="balanced",
+            classes=np.unique(self.y_train),
+            y=self.y_train
+        )
+        class_weight_dict = dict(enumerate(class_weight))
+        
+        self.model.fit(
+            self.X_train, self.y_train,
+            epochs = 10,
+            batch_size = 32,
+            validation_split = 0.1,
+            class_weight=class_weight_dict
+        )
+        
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.model.save(os.path.join(base_dir, "lstm_model.keras"))
+        
+    def evaluate(self):
+        """
+        Generates predictions and returns evaluation metrics.
+
+        Returns:
+            metrics_dict: A dictionary of the resulting metrics.
+        """
+
+        y_pred_proba = self.model.predict(self.X_test)
+        self.y_pred = (y_pred_proba > 0.5).astype(int).flatten() 
+        
+        metrics_dict = {
+            "loss": self.model.evaluate(self.X_test, self.y_test, verbose=0)[0],
+            "accuracy": accuracy_score(self.y_test, self.y_pred),
+            "precision": precision_score(self.y_test, self.y_pred),
+            "recall": recall_score(self.y_test, self.y_pred),
+            "f1_score": f1_score(self.y_test, self.y_pred),
+            "confusion_matrix": confusion_matrix(self.y_test, self.y_pred)
+        }
+        return metrics_dict
+    
+    def run_lstm_pipeline(self):
+        self.set_features()
+        self.build_model()
         self.train()
         return self.evaluate()

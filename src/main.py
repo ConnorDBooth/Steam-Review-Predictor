@@ -1,12 +1,13 @@
 #IMPORTS 
 from preprocessing_data.pre_processing import PreProcessor
-from feature_engineering.build_features import LogisticRegressionFeatureEngineering, TFIDFFeatureEngineering
-from models.train_model import BasicLogisticRegressionTraining, BasicRandomForestTraining
+from feature_engineering.build_features import LogisticRegressionFeatureEngineering, TFIDFFeatureEngineering,LSTMFeatureEngineering
+from models.train_model import BasicLogisticRegressionTraining, BasicRandomForestTraining,LSTMTraining
 from visualization.visualize import LogisticRegressionVisualizer, RandomForestVisualizer, TFIDFVisualizer
 
 def main():
     processor = PreProcessor("src/data/raw/all_reviews.csv")
-    df = processor.preprocess(1000000)
+    df = processor.preprocess(500000)
+    print(df["voted_up"].value_counts())
     
     feature_builder = LogisticRegressionFeatureEngineering(df)
     base_train_df, base_test_df = feature_builder.split_data()
@@ -50,6 +51,14 @@ def main():
 
     rf_plot = RandomForestVisualizer(rf_trainer.model, feature_builder.feature_cols)
     rf_plot.plot_feature_importance()
-
+    
+    #LSTM
+    lstm_builder = LSTMFeatureEngineering(df)
+    lstm_train_df, lstm_test_df = lstm_builder.split_data()
+    lstm_trainer = LSTMTraining(lstm_train_df, lstm_test_df)
+    lstm_results = lstm_trainer.run_lstm_pipeline()
+    print("\nLSTM Results:")
+    for k, v in lstm_results.items():
+        print(f"{k}: {v}")
 if __name__ == "__main__":
     main()
