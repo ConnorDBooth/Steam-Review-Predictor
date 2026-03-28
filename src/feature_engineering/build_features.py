@@ -1,6 +1,11 @@
 #IMPORTS
 import pandas as pd
+import os
+import numpy as np
+import joblib 
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 #CONSTANTS
 RANDOM_STATE = 42
@@ -134,3 +139,87 @@ class TFIDFFeatureEngineering(LogisticRegressionFeatureEngineering):
         self.feature_cols = self.feature_cols + list(tfidf_df.columns)
 
         return self.df
+
+class LSTMFeatureEngineering:
+    def __init__(self, df=None, max_words=2000, max_len=100):
+        """
+        Constructor for the "LSTMFeatureEngineering" class.
+        Sets target variable and text column.
+        oov_token = "<OOV>" in the Tokenizer function is used to 
+        handle words in text data that where not part of training.
+
+        Args:
+            df: Input dataframe, Defaults to None.
+            max_words:Limits how many unique words the model knows, Defaults to 2000.
+            max_len: Controls the max length of each input sequence,  Defaults to 100.
+        """
+        self.df = df
+        self.target_col = "voted_up"
+        self.text_col = "review"
+        self.max_words = max_words
+        self.max_len = max_len
+        self.tokenizer = Tokenizer(num_word=self.max_words, oov_token="<00V>")
+        
+    def split_data(self, test_size=0.2, random_state=RANDOM_STATE):
+        """
+        Creates Train and Test splits of the data. 
+
+        Args:
+            test_size: Defaults to 0.2.
+            random_state: Defaults to RANDOM_STATE.
+
+        Returns:
+            train_df: Dataframe of training data
+            test_df: Dataframe of testing data
+        """
+        if self.df is None:
+            print("Error: No dataframe provided")
+        
+        train_df, test_df = train_test_split(
+            self.df[[self.text_col], self.target_col],
+            test_size=test_size,
+            random_state=random_state,
+            
+            # Use stratify to preserve the class distribution of the target variable (voted_up)
+            # in both the training and test sets. Without this, random splitting could create
+            # imbalanced subsets (Ex. too many positive reviews), leading to unreliable
+            # evaluation metrics and unfair comparisons between models.
+            stratify=self.df[self.target_col]
+        )
+        
+        return train_df, test_df
+    
+    def fit_transform(self, train_df, test_df):
+        """
+        Fits the tokenizer to the training data.
+        Converts reviews to padded integer sequences.
+
+        Args:
+            train_df: training dataframe
+            test_df: testing dataframe
+            
+        Return:
+            X_train, X_test: Padded arrays ready for LSTM input
+            y_train, y_test: Target arrays
+        """
+        #Fit tokenizer on training text
+        self.tokenizer.fit_on_texts(train_df[self.text_col])
+        
+        X_train_seq = self.tokenizer.texts_to_sequences(train_df[self.text_col])
+        X_test_seq = self.tokenizer.text_to_sequences(test_df[self.text_col])
+        
+        #All inputs must be the same length, need to pad shorter inputs with 0s
+        #'post' adds the additional 0's to the back (Ex. [15, 145, 0, 0, 0])
+        X_train = pad_sequences(X_train_seq, maxlen=self.max_len, padding='post', truncating='post')
+        X_test = pad_sequences(X_test_seq, maxlen=self.max_len, padding="post", truncating="post")
+        
+        y_train = np.array(train_df[self.target_col])
+        y_test= np.array(test_df[self.target_col])
+        
+        
+        #Save tokenizer
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        models_dir = os.path.join(base_dir, "../models")
+        joblib.dump(self.tokenizer, os.path.join(models_dir, "lstm_tokenizer.pkl"))
+        
+        return X_train, X_test, y_train, y_test 
