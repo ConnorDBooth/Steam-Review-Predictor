@@ -2,6 +2,10 @@
 #IMPORTS
 import joblib
 import os
+import numpy as np
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from feature_engineering.build_features import LSTMFeatureEngineering
 
 
 class BasicLogisticRegressionPredictor:
@@ -59,3 +63,30 @@ class BasicRandomForestPredictor:
         y_pred_proba = self.model.predict_proba(X)
 
         return y_pred, y_pred_proba
+    
+    class LSTMPredictor:
+        def __init__(self):
+            """
+            Loads the trained LSTM model and tokenizer from the models directory.
+            """
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            self.model = load_model(os.path.join(base_dir, "lstm_model.keras"))
+            self.tokenizer = joblib.load(os.path.join(base_dir, "lstm_tokenizer.pkl"))
+            self.max_length = LSTMFeatureEngineering.max_len
+
+        def predict(self, texts):
+            """
+            Takes a list of raw review strings and returns predictions.
+            Args:
+                texts: A list of review strings
+            Returns:
+                y_pred: Hard predictions (0 or 1)
+                y_pred_proba: Confidence scores between 0 and 1
+            """
+            sequences = self.tokenizer.texts_to_sequences(texts)
+            padded = pad_sequences(sequences, maxlen=self.max_length, padding='post', truncating='post')
+
+            y_pred_proba = self.model.predict(padded).flatten()
+            y_pred = (y_pred_proba > 0.5).astype(int)
+
+            return y_pred, y_pred_proba

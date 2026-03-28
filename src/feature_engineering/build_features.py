@@ -158,7 +158,7 @@ class LSTMFeatureEngineering:
         self.text_col = "review"
         self.max_words = max_words
         self.max_len = max_len
-        self.tokenizer = Tokenizer(num_word=self.max_words, oov_token="<00V>")
+        self.tokenizer = Tokenizer(num_words=self.max_words, oov_token="<OOV>")
         
     def split_data(self, test_size=0.2, random_state=RANDOM_STATE):
         """
@@ -176,7 +176,7 @@ class LSTMFeatureEngineering:
             print("Error: No dataframe provided")
         
         train_df, test_df = train_test_split(
-            self.df[[self.text_col], self.target_col],
+            self.df[[self.text_col, self.target_col]],
             test_size=test_size,
             random_state=random_state,
             
@@ -206,7 +206,7 @@ class LSTMFeatureEngineering:
         self.tokenizer.fit_on_texts(train_df[self.text_col])
         
         X_train_seq = self.tokenizer.texts_to_sequences(train_df[self.text_col])
-        X_test_seq = self.tokenizer.text_to_sequences(test_df[self.text_col])
+        X_test_seq = self.tokenizer.texts_to_sequences(test_df[self.text_col])
         
         #All inputs must be the same length, need to pad shorter inputs with 0s
         #'post' adds the additional 0's to the back (Ex. [15, 145, 0, 0, 0])
