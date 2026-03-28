@@ -220,3 +220,7 @@ src/data/raw/
 
 # Ignore train/test data
 src/data/processed
+
+#ignore pkl and keras files
+*.pkl
+*.keras
