@@ -12,6 +12,10 @@ class LogisticRegressionVisualizer():
         
         
     def plot_feature_importance(self):
+        """
+        Create a horizontal bar plot showing the weight of 
+        the coefficient for each feature.
+        """
         #Gather feature coefficients
         coefficients = self.model.coef_[0]
         #Create a dataframe of model features and their coefficients
@@ -28,6 +32,7 @@ class LogisticRegressionVisualizer():
         plt.xlabel("Strength of coefficient β")
         plt.ylabel("Name of feature")
         plt.tight_layout()
+        #Save resulting plot to /reports/figures
         base_dir = os.path.dirname(os.path.abspath(__file__))
         os.makedirs(f"{base_dir}/../../reports/figures", exist_ok=True)
         plt.savefig(f"{base_dir}/../../reports/figures/feature_importance.png")
