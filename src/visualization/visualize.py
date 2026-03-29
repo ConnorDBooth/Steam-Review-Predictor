@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc
 
 class LogisticRegressionVisualizer():
@@ -39,6 +40,29 @@ class LogisticRegressionVisualizer():
         plt.savefig(f"{base_dir}/../../reports/figures/feature_importance.png")
         plt.show()
 
+    def plot_confusion_matrix(self, y_test, y_pred):
+        """
+        Plots a heatmap of the confusion matrix showing true vs predicted labels.
+        """
+        cm = confusion_matrix(y_test, y_pred)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=['Predicted Negative', 'Predicted Positive'],
+                    yticklabels=['Actually Negative', 'Actually Positive'])
+        plt.title("Logistic Regression Confusion Matrix")
+        plt.tight_layout()
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        os.makedirs(f"{base_dir}/../../reports/figures", exist_ok=True)
+        plt.savefig(f"{base_dir}/../../reports/figures/lr_confusion_matrix.png")
+        plt.show()
+        
+    def plot_all(self, y_test, y_pred):
+        """
+        Run all visualizations
+        """
+        self.plot_feature_importance()
+        self.plot_confusion_matrix(y_test, y_pred)
+        
 class RandomForestVisualizer():
     def __init__(self, model, feature_cols):
         self.model = model
@@ -60,7 +84,30 @@ class RandomForestVisualizer():
         os.makedirs(f"{base_dir}/../../reports/figures", exist_ok=True)
         plt.savefig(f"{base_dir}/../../reports/figures/rf_feature_importance.png")
         plt.show()
-
+    
+    def plot_confusion_matrix(self, y_test, y_pred):
+        """
+        Plots a heatmap of the confusion matrix showing true vs predicted labels.
+        """
+        cm = confusion_matrix(y_test, y_pred)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=['Predicted Negative', 'Predicted Positive'],
+                    yticklabels=['Actually Negative', 'Actually Positive'])
+        plt.title("Random Forest Confusion Matrix")
+        plt.tight_layout()
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        os.makedirs(f"{base_dir}/../../reports/figures", exist_ok=True)
+        plt.savefig(f"{base_dir}/../../reports/figures/rf_confusion_matrix.png")
+        plt.show()
+        
+    def plot_all(self, y_test, y_pred):
+        """
+        Run all visualizations
+        """
+        self.plot_feature_importance()
+        self.plot_confusion_matrix(y_test, y_pred)
+        
 class TFIDFVisualizer():
     def __init__(self, model, feature_cols):
         self.model = model
@@ -90,6 +137,7 @@ class TFIDFVisualizer():
         plt.show()
         
         
+        
 class LSTMVisualizer():
     def __init__(self, model, history, y_test, y_pred, y_pred_proba):
         self.model = model
@@ -100,6 +148,11 @@ class LSTMVisualizer():
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         
     def plot_training_history(self):
+        """
+        PLots training and validation loss over each epoch.
+        Growing gap between training and validation indicates overfitting,
+        memorizing rather than generalizing. 
+        """
         plt.figure(figsize=(10,5))
         plt.plot(self.history.history["loss"], label="Training Loss", color="steelblue")
         plt.plot(self.history.history["val_loss"], label = "Validation Loss", color = "tomato")
@@ -116,7 +169,6 @@ class LSTMVisualizer():
         """
         Plots a heatmap of the confusion matrix showing true vs predicted labels.
         """
-        from sklearn.metrics import confusion_matrix
         cm = confusion_matrix(self.y_test, self.y_pred)
 
         plt.figure(figsize=(8, 6))
@@ -153,9 +205,41 @@ class LSTMVisualizer():
         """
         Run all visualizations
         """
-        print(f"history: {self.history}")
-        print(f"y_pred: {self.y_pred}")
-        print(f"y_pred_proba: {self.y_pred_proba:}")
         self.plot_training_history()
         self.plot_confusion_matrix()
         self.plot_roc_curve()
+        
+class ModelComparisonVisualizer():
+    def __init__(self, results_dict):
+        """
+        Args:
+            results_dict: Dictionary of model names to their metrics dictionaries
+            Example: {"LR": lr_results, "RF": rf_results, "LSTM": lstm_results}
+        """
+        self.results_dict = results_dict
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    def plot_comparison(self):
+        """
+        Plots a grouped bar chart comparing accuracy, precision,
+        recall and f1 score across all models.
+        """
+        metrics = ["accuracy", "precision", "recall", "f1_score"]
+
+        comparison_df = pd.DataFrame({
+            model: [results[m] for m in metrics]
+            for model, results in self.results_dict.items()
+        }, index=metrics)
+
+        comparison_df.plot(kind="bar", figsize=(12, 6), colormap="Set2", edgecolor="black")
+        plt.xlabel("Metric")
+        plt.ylabel("Score")
+        plt.title("Model Comparison")
+        plt.xticks(rotation=0)
+        plt.ylim(0, 1)
+        plt.legend(title="Model")
+        plt.tight_layout()
+        os.makedirs(f"{self.base_dir}/../../reports/figures", exist_ok=True)
+        plt.savefig(f"{self.base_dir}/../../reports/figures/model_comparison.png")
+        plt.show()
+    

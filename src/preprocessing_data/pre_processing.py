@@ -305,7 +305,7 @@ class PreProcessor:
             self.df: DataFrame
         """
         self.load_data(nrows=nrows)
-        self.remove_uninteresting_columns()
+        #self.remove_uninteresting_columns()
         self.filter_english_reviews()
         self.remove_no_playtime()
         self.remove_playtime_outliers()

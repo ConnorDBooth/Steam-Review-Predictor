@@ -2,9 +2,9 @@
 import joblib
 import os
 import sklearn.linear_model as skl_lm
-from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import pandas as pd
 import numpy as np
@@ -136,12 +136,50 @@ class BasicRandomForestTraining:
         self.X_test = self.test_df[features]
         self.y_test = self.test_df[target_variable]
 
-    def train(self):
+    def tune_hyperparameters(self):
+        """
+        Usee RandomizedSearchCV to find optimal hyperparameters for
+        RandomForest model
+
+        Returns:
+            best_params_: Dictionary of the best hyperparams
+        """
+        param_dist = {
+            "n_estimators": [50, 100, 200],
+            "max_depth": [None, 10, 20, 30],
+            "min_samples_split": [2, 5, 10],
+            "max_features": ["sqrt", "log2"]
+        }
+        
+        random_search = RandomizedSearchCV(
+            RandomForestClassifier(class_weight="balanced", random_state=42),
+            param_distributions=param_dist,
+            n_iter=10,
+            cv=3,
+            scoring="f1",
+            verbose=1,
+            random_state=42
+        )
+
+        random_search.fit(self.X_train, self.y_train)
+        
+        print(f"Best parameters: {random_search.best_params_}")
+        print(f"Best F1 score: {random_search.best_score_:.4f}")
+
+        return random_search.best_params_
+    
+    def train(self, best_params=None):
         """
         Trains the Random Forest model and saves it to disk.
         No scaling required since decision trees are not
         sensitive to feature scale.
         """
+        if best_params:
+            self.model = RandomForestClassifier(
+            class_weight="balanced",
+            random_state=42,
+            **best_params
+        )
         self.model.fit(self.X_train, self.y_train)
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -168,6 +206,14 @@ class BasicRandomForestTraining:
     def run_rf_pipeline(self):
         self.set_features()
         self.train()
+        #Train without tuning to compare results
+        default_results = self.evaluate()
+        print("\nDefault Random Forest Results:")
+        for k, v in default_results.items():
+            print(f"{k}: {v}")
+        #Train with tuning
+        best_params = self.tune_hyperparameters()
+        self.train(best_params)
         return self.evaluate()
     
 class LSTMTraining:
