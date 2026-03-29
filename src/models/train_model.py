@@ -407,8 +407,10 @@ class LSTMTraining:
             print(f"{k}: {v}")
 
         if tune:
-            best_params = self.tune_hyperparameters(n_iter=n_iter)
-            self.train()
+            self.tune_hyperparameters(n_iter=n_iter)
+            # Save the best model found during tuning
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            self.model.save(os.path.join(base_dir, "lstm_model.keras"))
             return self.evaluate()
 
         return default_results
