@@ -300,7 +300,79 @@ class LSTMTraining:
         
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.model.save(os.path.join(base_dir, "lstm_model.keras"))
-        
+    
+    def tune_hyperparameters(self, n_iter=10):
+        """
+        Performs random search over LSTM hyperparameters.
+        Trains n_iter random combinations and keeps the best by F1 score.
+
+        Args:
+            n_iter: Number of random combinations to try. Defaults to 10.
+
+        Returns:
+            best_params: Dictionary of the best hyperparameters found.
+        """
+        import random
+
+        param_distributions = {
+            "lstm_units":    [16, 32, 64, 128],
+            "embedding_dim": [32, 50, 100],
+            "epochs":        [5, 10],
+            "batch_size":    [32, 64, 128]
+        }
+
+        class_weight = compute_class_weight(
+            class_weight="balanced",
+            classes=np.unique(self.y_train),
+            y=self.y_train
+        )
+        class_weight_dict = dict(enumerate(class_weight))
+
+        results = []
+
+        for i in range(n_iter):
+            params = {k: random.choice(v) for k, v in param_distributions.items()}
+            print(f"\nTrial {i+1}/{n_iter}: {params}")
+
+            model = Sequential([
+                Embedding(
+                    input_dim=self.feature_engineer.max_words,
+                    output_dim=params["embedding_dim"],
+                    input_length=self.feature_engineer.max_len
+                ),
+                LSTM(units=params["lstm_units"]),
+                Dense(1, activation="sigmoid")
+            ])
+            model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+            model.fit(
+                self.X_train, self.y_train,
+                epochs=params["epochs"],
+                batch_size=params["batch_size"],
+                validation_split=0.1,
+                class_weight=class_weight_dict,
+                verbose=0
+            )
+
+            y_pred = (model.predict(self.X_test) > 0.5).astype(int).flatten()
+            score = f1_score(self.y_test, y_pred)
+            print(f"  F1: {score:.4f}")
+
+            results.append((score, params, model))
+
+        results.sort(key=lambda x: x[0], reverse=True)
+        best_score, best_params, best_model = results[0]
+
+        print(f"\nBest parameters: {best_params}")
+        print(f"Best F1: {best_score:.4f}")
+
+        # Replace model with best found
+        self.model = best_model
+        self.embedding_dim = best_params["embedding_dim"]
+        self.lstm_units = best_params["lstm_units"]
+
+        return best_params
+
     def evaluate(self):
         """
         Generates predictions and returns evaluation metrics.
@@ -323,8 +395,20 @@ class LSTMTraining:
         }
         return metrics_dict
     
-    def run_lstm_pipeline(self):
+    def run_lstm_pipeline(self, tune=False, n_iter=10):
         self.set_features()
         self.build_model()
         self.train()
-        return self.evaluate()
+
+        # Baseline results
+        default_results = self.evaluate()
+        print("\nDefault LSTM Results:")
+        for k, v in default_results.items():
+            print(f"{k}: {v}")
+
+        if tune:
+            best_params = self.tune_hyperparameters(n_iter=n_iter)
+            self.train()
+            return self.evaluate()
+
+        return default_results

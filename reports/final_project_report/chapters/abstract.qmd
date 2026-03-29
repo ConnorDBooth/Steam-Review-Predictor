@@ -19,6 +19,6 @@ review the text to extract numerical features, such as review length and sentime
 capture the tone of the written review. These text-based features will be combined with behaviour 
 variables, such as total play time. The data will then be split into train and test sets. Multiple classification 
 models will be trained, and performance will be compared.  
-The dataset being used is the Steam Reviews dataset found on Kaggle. This dataset contains 
+The dataset being used is the [Steam Reviews dataset](https://www.kaggle.com/datasets/kieranpoc/steam-reviews/data) found on Kaggle. This dataset contains 
 millions of user reviews and associated behavioural features. The large size of the dataset will allow our 
 models to be trained on a large amount of real player feedback, increasing the reliability of the analysis.
