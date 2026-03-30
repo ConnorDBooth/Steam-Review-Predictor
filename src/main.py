@@ -5,6 +5,9 @@ from models.train_model import BasicLogisticRegressionTraining, BasicRandomFores
 from visualization.visualize import LogisticRegressionVisualizer, RandomForestVisualizer, TFIDFVisualizer,LSTMVisualizer, ModelComparisonVisualizer
 
 def main():
+    #the file you load here CAN be the base dataset, but it's recommended
+    #that you run the dataset_creation notebook to generate a smaller set (saving on memory) and 
+    #adjust properties like class distribution, row count, etc.
     processor = PreProcessor("src/data/raw/balanced_10m_reviews.csv")
     df = processor.preprocess(1000000)
     
