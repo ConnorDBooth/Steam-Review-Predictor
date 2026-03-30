@@ -6,7 +6,7 @@ from visualization.visualize import LogisticRegressionVisualizer, RandomForestVi
 
 def main():
     processor = PreProcessor("src/data/raw/balanced_10m_reviews.csv")
-    df = processor.preprocess(100000)
+    df = processor.preprocess(1000000)
     
     feature_builder = LogisticRegressionFeatureEngineering(df)
     #Save original feature list
@@ -63,19 +63,24 @@ def main():
     lstm_train_df, lstm_test_df = lstm_builder.split_data()
     lstm_trainer = LSTMTraining(lstm_train_df, lstm_test_df)
     lstm_results = lstm_trainer.run_lstm_pipeline()
-    print("\nLSTM Results:")
-    for k, v in lstm_results.items():
-        print(f"{k}: {v}")
+    
+    
         
     lstm_plot = LSTMVisualizer(lstm_trainer.model, lstm_trainer.history, lstm_trainer.y_test, lstm_trainer.y_pred, lstm_trainer.y_pred_proba)
     lstm_plot.plot_all()
+    
+    lstm_tuned = lstm_trainer.run_lstm_pipeline(tune=True)
+
+    lstm_tuned_plot = LSTMVisualizer(lstm_trainer.model, lstm_trainer.history, lstm_trainer.y_test, lstm_trainer.y_pred, lstm_trainer.y_pred_proba)
+    lstm_tuned_plot.plot_all()
     
     
     comparison = ModelComparisonVisualizer({
         "Logistic Regression": lr_results,
         "Random Forest": rf_results,
         "TF-IDF LR": tfidf_results,
-        "LSTM": lstm_results
+        "LSTM": lstm_results,
+        "Tuned LSTM": lstm_tuned
     })
     comparison.plot_comparison()
     
