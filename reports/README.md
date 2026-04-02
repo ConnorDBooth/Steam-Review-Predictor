@@ -69,4 +69,4 @@ Please submit the recorded video and  to keep YouTube Video Presentation (non-pu
 - Click the down arrow under "Visibility" and choose `Unlisted`.
 - Save and share the link below.
 
-To watch the video presentation, click the following YouTube link: [Link]()
+To watch the video presentation, click the following YouTube link: [Link](https://youtu.be/BQPUzaFpfnw?si=o3ymegLMw0NxE72P)

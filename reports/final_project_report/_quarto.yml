@@ -6,7 +6,7 @@ project:
     - index.qmd            
 book:
   title: "Final Project Report"  # Change to your title of the project
-  author: "Connor Booth, Filip Droka"
+  author: "Connor Booth, Filip Droca"
   date: April 1st, 2026
   reader-mode: true
   page-footer:
@@ -34,7 +34,7 @@ format:
   #   toc: true
   #   number-sections: true
   #   # Change the following to your names
-  #   author-meta: "Dr. Sukhjit Singh Sehra"
+  #   author-meta: "Filip Droca, Connor Booth"
 
   # # ── 2. PDF (single file) ─────────────────────────────────
   titlepage-pdf:
@@ -50,7 +50,7 @@ format:
     titlepage-header: "The Publisher"
     # Change the following to your names
     titlepage-footer: |
-      last name, first name; last name, first name of authors\
+      Booth, Connor; Droca, Filip
     coverpage: "great-wave"
     coverpage-bg-image: "_extensions/nmfs-opensci/titlepage/images/TheGreatWaveoffKanagawa.jpeg"
     coverpage-title: "Project Report"
