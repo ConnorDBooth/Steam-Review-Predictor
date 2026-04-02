@@ -28,7 +28,7 @@ ROC-AUC - The Area Under the Receiver Operating Characteristic Curve was calcula
 
 ## Results Table
 
-Table 4.1: Model performance comparison on test data.
+: Model performance comparison on test data. {#tbl-performance}
 
 | Model                         | Accuracy | Precision | Recall | F1-Score |
 |:------------------------------|---------:|----------:|-------:|---------:|
@@ -37,7 +37,7 @@ Table 4.1: Model performance comparison on test data.
 | Random Forest (Default)              | 0.7945 | 0.8240 | 0.8983 | 0.8596 |
 | Random Forest (Tuned)                | 0.7965 | 0.8300 | 0.8921 | 0.8599 |
 | LSTM (Default)                       | 0.8908 | 0.9367 | 0.9051 | 0.9207 |
-| LSTM (Tuned)                         | 0.8962 | 0.9359 | 0.9144 | 0.9250 |
+| **LSTM (Tuned)**                         | **0.8962** | **0.9359** | **0.9144** | **0.9250** |
 
 Table 4.1 summarizes the performance of the classification models on the 20% holdout testing set (X_test), preserving the stratified class distribution
 
@@ -47,13 +47,13 @@ The experimental analysis identifies the tuned Long Short-Term Memory (LSTM) mod
 
 The baseline Logistic Regression model which relied solely on numerical features, achieved an F1-score of 0.784. This indicates that features such as playtime, review length, and weighted vote score do have predictive value; they lack the ability to capture the full picture of the review. This limitation is seen again in the Random Forest model, which despite its ability to model non-linear relationships, only improved to an F1-score of 0.859. Suggesting that increasing model complexity alone is insufficient when the features themselves lack predicting power.
 
-The introduction of TF-IDF features into the Logistic Regression model resulted in a significant performance increase over the baseline with an F1-score of 0.875. This result, along with the feature importance graph (Figure 7), which sees TF-IDF derived features overwhelmingly populate the 50 most influential features, confirm that text based features provide much stronger predictive power than behavioural data. However, TF-IDF captures only word frequency, not the context behind them. As a result, it cannot distinguish between phrases such as “good” and “not good” in turn limiting its ability to fully model sentiment. 
+The introduction of TF-IDF features into the Logistic Regression model resulted in a significant performance increase over the baseline with an F1-score of 0.875. This result, along with the feature importance graph (@fig-logistic-tfidffeatureimportance), which sees TF-IDF derived features overwhelmingly populate the 50 most influential features, confirm that text based features provide much stronger predictive power than behavioural data. However, TF-IDF captures only word frequency, not the context behind them. As a result, it cannot distinguish between phrases such as “good” and “not good” in turn limiting its ability to fully model sentiment. 
 
 The superior performance of the LSTM model can be attributed to its ability to capture context within text. By processing reviews as ordered sequences rather than independent terms, the LSTM is able to learn patterns and informal language commonly found in Steam reviews. THis allows it to outperform both numerical based models and TF-IDF approaches.
 
-Analysis of the confusion matrices (Figures 1,2,3,4,5,6) further support this idea. The LSTM model has a strong balance between precision and recall, effectively identifying both the majority (positive) and minority (negative) reviews without heavy bias. This indicates that the model is not simply exploiting the class imbalance, but actually learning meaningful linguistic patterns to predict sentiment.
+Analysis of the confusion matrices (@fig-logistic-confusion, @fig-logistic-tfidfconfusion, @fig-rf-confusion, @fig-rftuned-confusion, @fig-LSTM-confusion, @fig-tunedLSTM-confusion) further support this idea. The LSTM model has a strong balance between precision and recall, effectively identifying both the majority (positive) and minority (negative) reviews without heavy bias. This indicates that the model is not simply exploiting the class imbalance, but actually learning meaningful linguistic patterns to predict sentiment.
 
-Finally, feature importance analysis from the Logistic Regression model (Figure 7) provides more insight into the role of behavioural features. The three engineered features such as playtime_ratio were some of the most influential predictors in the behavioural only model. This suggests that more engaged or detailed reviews tend to correlate with stronger negative sentiment predictions. With that being said, their predictive power still remains well below that of the contents of the review text.
+Finally, feature importance analysis from the Logistic Regression model (@fig-logistic-featureimportance) provides more insight into the role of behavioural features. The three engineered features such as playtime_ratio were some of the most influential predictors in the behavioural only model. This suggests that more engaged or detailed reviews tend to correlate with stronger negative sentiment predictions. With that being said, their predictive power still remains well below that of the contents of the review text.
 
 
 

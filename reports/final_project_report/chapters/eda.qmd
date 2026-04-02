@@ -80,7 +80,9 @@ Review length was also highly right-skewed, with an average of 48.6 words and a 
 
 Regarding the reviewers themselves, an average reviewer writes 34.4 reviews, the median of which is 7, and the largest value is 10,446. Purchase location was largely dominated by games purchased on Steam, which took home 65.8% of the share. 12.5% of reviews were written during early access, and 3.5% of reviewers received the game for free.
 
-A correlation heatmap (Figure 14) was generated to examine the relationships between numeric features. Notable findings include a mildly positive correlation between weighted_vote_score and votes_up, indicating that Steam’s helpfulness score is influenced by upvotes. Additionally, weighted_vote_score and voted_up show a negative correlation, showing that highly scored reviews tend to be negative. 
+A correlation heatmap (@fig-correlation-params) was generated to examine the relationships between numeric features. Notable findings include a mildly positive correlation between weighted_vote_score and votes_up, indicating that Steam’s helpfulness score is influenced by upvotes. Additionally, weighted_vote_score and voted_up show a negative correlation, showing that highly scored reviews tend to be negative. 
+
+![Correlation heatmap between features in the downsampled dataset.](chapters/corr_matrix.png){#fig-correlation-params}
 
 ## Feature Selection
 

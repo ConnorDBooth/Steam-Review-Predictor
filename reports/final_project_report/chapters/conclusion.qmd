@@ -1,7 +1,9 @@
 # Conclusion
 
 ## Summary of Findings
-The primary objective of the project was to determine whether player sentiment could be accurately predicted using a combination of behavioural metadata and natural language processing. Our results, summarized in Table 4.1 and visualized in Figure 13, indicate a clear hierarchy in predictive power.
+![Full model comparison across defined metrics.](chapters/model_comparison.png){#fig-comparative-analysis}
+
+The primary objective of the project was to determine whether player sentiment could be accurately predicted using a combination of behavioural metadata and natural language processing. Our results, summarized in @tbl-performance and visualized in @fig-comparative-analysis, indicate a clear hierarchy in predictive power.
 
 The naive Logistic Regression model, which relied solely on metadata like playtime and votes, achieved a respectable but limited F1-score of 0.784~. This suggests that while “time spent in-game” is a proxy for engagement, it is an unreliable indicator of sentiment. A player may log 500 hours in a title and still leave a negative review, perhaps due to a bad patch or “review bombing”, meaning such nuances cannot be captured by metadata-only models.
 
@@ -12,21 +14,25 @@ The TF-IDF Logistic Regression model was more capable of capturing the textual f
 The transition to the tuned LSTM model provided a definite solution, with it achieving the highest F1-score of 0.925~, and the highest accuracy of 0.896~. By analyzing the linguistic sequences of the reviews, the model was able to successfully navigate the mannerisms and slang often prevalent on the platform. This confirms that the textual context of the review is the best source of sentiment truth, as it is best able to capture the reviewer’s intent that behavioural stats simply can’t mirror.
 
 
-## Challenges and Limitations
+## Challenges, Limitations and Mistakes
 
 The development process highlighted several hurdles.
 
-Data Volume vs. Hardware: Processing a dataset of 2 million rows (as discussed in section 3.1) presented significant memory bottlenecks when constructing the TF-IDF features, and computational struggles with the LSTM model training and tuning. While the large sample size was necessary for the deep learning, it forced a trade-off in hyperparameter tuning depth due to the inability to access the accelerated computing of the GPU. 
+**Data Volume vs. Hardware**: Processing a dataset of 2 million rows (as discussed in section 3.1) presented significant memory bottlenecks when constructing the TF-IDF features, and computational struggles with the LSTM model training and tuning. While the large sample size was necessary for the deep learning, it forced a trade-off in hyperparameter tuning depth due to the inability to access the accelerated computing of the GPU. 
 
-Linguistic Noise: Steam reviews are incredibly messy, often being mislabelled, containing no-text reviews (such as ASCII art), and high sarcasm. While our cleaning pipeline removed most special characters, these non-semantic reviews likely contribute to the residual error rate observed in Table 4.1.
+**Linguistic Noise**: Steam reviews are incredibly messy, often being mislabelled, containing no-text reviews (such as ASCII art), and high sarcasm. While our cleaning pipeline removed most special characters, these non-semantic reviews likely contribute to the residual error rate observed in @tbl-performance.
 
-Feature Lag: Metadata like playtime_at_review is a “snapshot” that may not reflect the player’s current sentiment, especially for live-service games that evolve.
+**Feature Lag**: Metadata like playtime_at_review is a “snapshot” that may not reflect the player’s current sentiment, especially for live-service games that evolve.
+
+**LSTM Early Dropout**: While the hyperparameters were tuned to lower epoch models, compute time could have been saved by dropping out of model training early once overfitting was detected.
 
 
 ## Future Considerations
 
 To evolve past our current best model, future iterations could consider the following.
-Transformer-Based Architectures: Implementing a model such as RoBERTa would allow the model to better handle the long-range dependencies and sarcasm that even the LSTM struggles with.
-Aspect-based Sentiment Analysis: Instead of only classifying on the sentiment of the review, future models could try to predict why the review has its structure. As an example, a negative review being classified as stemming from a bad patch compared to a negative review being classified as dealing with core issues of the product, such as its design.
 
-Cross-genre Generalizing: A proper investigation could be made into whether a model trained on a sub-genre of reviews could accurately predict sentiment for another distinct sub-genre, even if the vocabulary used differs significantly. For example, if training on only reviews for “Tactical” games is able to successfully capture sentiment on reviews for “Puzzle” games. 
+**Transformer-Based Architectures**: Implementing a model such as RoBERTa would allow the model to better handle the long-range dependencies and sarcasm that even the LSTM struggles with.
+
+**Aspect-based Sentiment Analysis**: Instead of only classifying on the sentiment of the review, future models could try to predict why the review has its structure. As an example, a negative review being classified as stemming from a bad patch compared to a negative review being classified as dealing with core issues of the product, such as its design.
+
+**Cross-genre Generalizing**: A proper investigation could be made into whether a model trained on a sub-genre of reviews could accurately predict sentiment for another distinct sub-genre, even if the vocabulary used differs significantly. For example, if training on only reviews for “Tactical” games is able to successfully capture sentiment on reviews for “Puzzle” games. 

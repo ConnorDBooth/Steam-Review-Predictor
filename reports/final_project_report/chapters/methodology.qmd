@@ -44,15 +44,42 @@ The LSTM model was implemented using the Keras Sequential API and trained on the
 
 ### Logistic Regression
 
-Both of the logistic regression models were evaluated on the test set using five metrics: accuracy, precision, recall, F1-score, and a confusion matrix. These metrics were chosen to provide a comprehensive review of the model's performance. Given the class imbalance, accuracy alone could be misleading since a model predicting all reviews as positive would still achieve an accuracy of 70%. Precision and recall capture the relationship between false positives and false negatives, while the F1-score provides a single balanced measure of both. Additionally, two plots were generated for the baseline model. The first of which visualized the importance of each feature in prediction, showing the weight of β for each X value. Secondly, a heatmap of the confusion matrix was generated, creating an easily understandable visualization of the distribution between correct and false predictions. For the TF-IDF variant, a similar feature importance plot was generated (Figure 9), which included the top-N TF-IDF coefficients, highlighting the most influential terms.
+Both of the logistic regression models were evaluated on the test set using five metrics: accuracy, precision, recall, F1-score, and a confusion matrix. These metrics were chosen to provide a comprehensive review of the model's performance. Given the class imbalance, accuracy alone could be misleading since a model predicting all reviews as positive would still achieve an accuracy of 70%. Precision and recall capture the relationship between false positives and false negatives, while the F1-score provides a single balanced measure of both. Additionally, two plots were generated for the baseline model. The first of which visualized the importance of each feature in prediction, showing the weight of β for each X value (@fig-logistic-featureimportance). Secondly, a heatmap of the confusion matrix was generated, creating an easily understandable visualization of the distribution between correct and false predictions (@fig-logistic-confusion). For the TF-IDF variant, a similar feature importance plot was generated (@fig-logistic-tfidffeatureimportance), which included the top-N TF-IDF coefficients, highlighting the most influential terms.
+
+![The feature importance produced by the naive Logistic Regression model.](chapters/feature_importance.png){#fig-logistic-featureimportance}
+
+![The naive Logistic Regression model’s confusion matrix.](chapters/lr_confusion_matrix.png){#fig-logistic-confusion}
+
+![The top 50 features produced by the TF-IDF Logistic Regression model.](chapters/tfidf_feature_importance.png){#fig-logistic-tfidffeatureimportance}
+
+![The TF-IDF Logistic Regression model’s confusion matrix.](chapters/tfidf_confusion_matrix.png){#fig-logistic-tfidfconfusion}
 
 ### Random Forest
 
-The random forest model was evaluated on the test set using the same metrics as previous models. A feature importance plot was generated using the model’s Gini impurity, providing insight into which features were most important in the model's decisions. Similar to other models, a confusion matrix heatmap was also generated (Figures 3 & 4).
+The random forest model was evaluated on the test set using the same metrics as previous models. A feature importance plot was generated using the model’s Gini impurity, providing insight into which features were most important in the model's decisions. Similar to other models, a confusion matrix heatmap was also generated for the base and tuned versions (@fig-rf-featureimportance, @fig-rftuned-confusion).
+
+![The feature importance produced by the trained Random Forest model.](chapters/rf_feature_importance.png){#fig-rf-featureimportance}
+
+![The base Random Forest model’s confusion matrix.](chapters/untunedrf_confusion_matrix.png){#fig-rf-confusion}
+
+![The tuned Random Forest model’s confusion matrix.](chapters/rf_confusion_matrix.png){#fig-rftuned-confusion}
 
 ### LSTM 
 
-The LSTM model was evaluated on the test set using the same five metrics as previous models. Additionally, a training history plot was generated to show the training and validation loss over each epoch for both the tuned, and base models (Figure 10 & 11). This provided insight into whether the model was overfitting or underfitting. A ROC curve was also generated to summarize model performance across all classification thresholds. Similar to all previous models, a heatmap of the correlation matrix was also generated (Figures 5 & 6).
+The LSTM model was evaluated on the test set using the same five metrics as previous models. Additionally, a training history plot was generated to show the training and validation loss over each epoch for both the tuned, and base models (@fig-LSTM-history, @fig-tunedLSTM-history). This provided insight into whether the model was overfitting or underfitting. ROC curves were also generated to summarize model performance across all classification thresholds (@fig-LSTM-ROC, @fig-tunedLSTM-ROC). Similar to all previous models, a heatmap of the correlation matrix was also generated (@fig-LSTM-confusion, @fig-tunedLSTM-confusion).
+
+![The base LSTM model’s training history.](chapters/EARLY_LSTM_training_history.png){#fig-LSTM-history}
+
+![The tuned LSTM model’s training history.](chapters/LSTM_training_history.png){#fig-tunedLSTM-history}
+
+![The AUC-ROC Curve for the base LSTM model.](chapters/EARLY_LSTM_roc_curve.png){#fig-LSTM-ROC}
+
+![The AUC-ROC Curve for the tuned LSTM model.](chapters/LSTM_roc_curve.png){#fig-tunedLSTM-ROC}
+
+![The base LSTM model’s confusion matrix.](chapters/EARLY_LSTM_confusion_matrix_plot.png){#fig-LSTM-confusion}
+
+![The tuned LSTM model’s confusion matrix.](chapters/LSTM_confusion_matrix_plot.png){#fig-tunedLSTM-confusion}
+
 
 ## Model Optimization
 
