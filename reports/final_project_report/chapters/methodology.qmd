@@ -1,32 +1,82 @@
 # Methodology
 
 ## Introduction to Python for Machine Learning
+To develop multiple robust and scalable models, the project employed Python and its data science tools. Machine learning models such as Logistic Regression and RandomForest were built using the Scikit-Learn library, along with a variety of its optimized statistical algorithms and evaluation metrics. For our LSTM deep learning model, Tensorflow and Keras were employed to construct and take advantage of its natural language processing layers and word embeddings. Numpy and Pandas were foundational in performing efficient vectorized data manipulation. 
 
 ## Platform and Machine Configurations Used
-Such Google Colab, Kaggle, Syzygy, or your own machine then the machine configuration.
+The development environment was deployed locally on our machines through Miniconda, with a dedicated environment to ensure dependency stability. This local environment introduced many memory issues related to natural language processing. Engineering around this bottleneck involved many data processing pipelines utilizing chunking to maintain memory safety and the “Big Data” nature of the source, while operating within local limits. 
 
 ## Data Split
 
-Data splitting is the process of dividing the data into training, validation, and test sets. This step can help you evaluate the performance of the model on new data.
+To ensure models would perform well on unseen data, the downsampled dataset was partitioned using Scikit-Learn’s train_test_split function, with an 80-20 partition on training and test data. The split was performed before scaling or tokenization of text, fitting exclusively on the training data to then be used to transform the test data, to avoid data leakage of the test set’s vocabulary and features.
 
 ## Model Planning
 
-The next step is to select the appropriate machine learning or deep learning models ( 2 - 3 ) that can be used to solve the problem. This involves evaluating different models and selecting the one that is best suited for the problem.
+### Logistic Regression
+
+Logistic regression was the first model chosen for this project because of its simplicity, interpretability, and well-known performance on binary classification problems. Unlike more complex models, logistic regression offers easily interpretable coefficients that indicate the strength of each feature's influence on the model’s prediction, making it a good starting point for understanding the relationship between the feature set and the response variable.
+
+Two variants of this model were implemented. The first being logistic regression on its own, the second was extended by using TF-IDF features derived from the review text. The text and numerical features were combined to assess if the actual content of the reviews resulted in a better model. 
+
+### Random Forest
+
+A random forest classifier was selected as the second model due to its ability to capture non-linear relationships between features without extensive feature scaling. A key advantage of random forest for this dataset is that decision trees are independent of the size of the input values. Meaning that feature scaling is not required. 
+
+### LSTM
+A Long Short-Term Memory (LSTM) neural network was chosen as the deep learning model for this project due to its ability to capture sequential context within text. Unlike the TF-IDF approach, which captures words themselves, but not the context around them, LSTM can understand the relationships between words and capture patterns such as recognizing the difference between “good” and “not good”. The LSTM was built without the use of pretrained word embeddings, and therefore all word representations were learned directly from the training data.
 
 ## Model Training: 
 
-This involves using the training data to adjust the model parameters to improve its accuracy.
+### Logistic Regression
+The base logistic regression model was implemented using Scikit-Learn’s LogisticRegression class with the newton-cg solver, originally trained on 13 numeric features outlined in the feature selection section before moving to 16 with three additional features engineered from the dataset. Before training, all features were standardized using the StandardScaler found in Scikit-Learn’s library. This stopped features with large values, such as playtime, from disproportionately affecting the model's predictions. To address the class imbalance, the “class_weight = balanced” parameter was added to the model, automatically adjusting the loss function to penalize misclassification of the minority class more heavily than the majority, discouraging the model from predicting every data point as positive. 
+
+The TF-IDF variant extended the base model by incorporating text features from the review. A TfidfVectorizer was fitted on the training data with a vocabulary size of 1,000 features. English stopwords were removed during vectorization to reduce noise from common words that carry no sentiment value, such as “is” or “the”. The resulting features were appended to the existing numeric features. 
+
+### Random Forest
+
+The random forest model was implemented using Scikit-Learn’s RandomForestClassifier and trained on the same 13 numeric features as the baseline logistic regression model. The initial configuration used 100 estimators with no maximum depth, a random state of 42 for reproducibility, and class_weight = balanced to address the class imbalance
+
+### LSTM
+
+The LSTM model was implemented using the Keras Sequential API and trained on the review text column of the dataset only. Before training, the review text was tokenized using the Keras Tokenizer class with a vocabulary size of 2,000 words. The out-of-vocabulary token <OOV> was used to handle words encountered at prediction time that were not present during training. Tokenized sequences were padded or truncated to a fixed length of 100 tokens using post-padding to ensure uniform input across all reviews. The model itself consisted of three layers: an embedding layer with an output dimension of 50, an LSTM layer with a size of 32 that processed the sequence and maintained a hidden state with contextual information, and a dense output layer with sigmoid activation, producing a probability between 0 and 1.
 
 ## Model Evaluation
 
-Once the model is trained, the next step is to evaluate its performance on a validation dataset. 
+### Logistic Regression
+
+Both of the logistic regression models were evaluated on the test set using five metrics: accuracy, precision, recall, F1-score, and a confusion matrix. These metrics were chosen to provide a comprehensive review of the model's performance. Given the class imbalance, accuracy alone could be misleading since a model predicting all reviews as positive would still achieve an accuracy of 70%. Precision and recall capture the relationship between false positives and false negatives, while the F1-score provides a single balanced measure of both. Additionally, two plots were generated for the baseline model. The first of which visualized the importance of each feature in prediction, showing the weight of β for each X value. Secondly, a heatmap of the confusion matrix was generated, creating an easily understandable visualization of the distribution between correct and false predictions. For the TF-IDF variant, a similar feature importance plot was generated (Figure 9), which included the top-N TF-IDF coefficients, highlighting the most influential terms.
+
+### Random Forest
+
+The random forest model was evaluated on the test set using the same metrics as previous models. A feature importance plot was generated using the model’s Gini impurity, providing insight into which features were most important in the model's decisions. Similar to other models, a confusion matrix heatmap was also generated (Figures 3 & 4).
+
+### LSTM 
+
+The LSTM model was evaluated on the test set using the same five metrics as previous models. Additionally, a training history plot was generated to show the training and validation loss over each epoch for both the tuned, and base models (Figure 10 & 11). This provided insight into whether the model was overfitting or underfitting. A ROC curve was also generated to summarize model performance across all classification thresholds. Similar to all previous models, a heatmap of the correlation matrix was also generated (Figures 5 & 6).
 
 ## Model Optimization
 
-Based on the results of the model evaluation, the next step is to optimize the model to improve its performance. This involves making changes to the model's architecture, tuning the hyperparameters, and retraining the model.
+### Logistic Regression
+After building the base model, hyperparameter tuning was performed using GridSearchCV with 5 folds. Searching over the parameter C across multiple ranges. C is responsible for controlling the inverse of the regularization strength. In practice, as C becomes smaller, stronger L2 regularization is applied, limiting the size of the model’s coefficients and reducing the risk of overfitting.
+
+Additionally, three more features were engineered specific to logistic regression to determine if more features could improve upon the model. The features included votes_ratio, a ratio based on the number of helpful votes and funny votes a given review has, playtime_ratio, based on playtime at review and total playtime, and finally review length, the numerical length of the review text
+
+### Random Forest
+Hyperparameter tuning was done using Scikit-Learn’s RandomizedSearchCV with 3-fold cross-validation and 10 randomly sampled parameter combinations. A randomized search was chosen over a grid search due to the larger number of hyperparameters and significantly longer training time compared to logistic regression. The search was done across four parameters: n_estimators from 50, 100, 200, max_depth from none, 10, 20, 30, min_samples_split from 2, 5, 10, and max_features from “sqrt” and “log2”. 
+
+### LSTM
+Tuning of the LSTM model was handled a bit differently than the other models. Keras models are not compatible with Scikit-Learn’s grid search, and therefore, a manual random search was implemented that randomly sampled combinations of four hyperparameters across the following ranges. Lstm_units from 16, 32, 64, 128, embedding_dim from 32, 50, 100, epochs from 5, 10, and finally batch_size from 32, 64, 128. For each of the combinations, a new model was built, trained, and evaluated. Tuning was implemented as an optional step in the pipeline with the tune flag. This allowed the baseline model and the tuned model to be compared against each other. 
 
 ## Final Model Building
 
-Once the model is optimized, the final step is to fit the model and report final test error for each model
+### Logistic Regression
 
-Present the information with support Screen Shots/ Figures (Each Figure must be numbered and Description of Figure must be provided)
+The final models of both variants were trained using the original parameters and 16 features, including the three additional engineered features. The trained models and scaler were saved to disk using joblib, and final test metrics were recorded on the test set. Predictions after training were handled through the dedicated BasicLogisticRegressionPredictor class, which loads the saved model and scaler, applying the same transformations before generating predictions.
+
+### Random Forest
+
+The final random forest model was trained using the optimal hyperparameter configuration. The trained model was saved to disk to allow the BasicRandomForestPredictor class to load the model and make predictions without re-training.
+
+### LSTM
+
+The final LSTM model was trained using the hyperparameter configuration identified during tuning. The model was saved using Keras, and the fitted tokenizer was saved using joblib. Predictions after training were handled through the dedicated LSTM predictor class.

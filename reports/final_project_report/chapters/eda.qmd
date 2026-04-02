@@ -1,35 +1,87 @@
 # Pre-Processing and Exploratory Data Analysis
-Once you have your dataset, you need to preprocess it to make it suitable for machine learning. This includes cleaning the data, handling missing values, encoding categorical variables, and scaling numerical features. This step is crucial as the accuracy of your model will depend on the quality of your data. 
-
 
 ## Dataset Collection
 
+The dataset used in this project is a publicly available collection of Steam consumer reviews sourced from Kaggle, containing over 100 million reviews. Due to the dataset’s large nature, major downsampling was required to be computationally feasible and address major issues relating to project requirements. One of such issues was class representation, as a naive classifier saying every review is positive, would result in an accuracy of 0.86, technically qualifying as a valid model. Additionally, it must be representative of the original dataset and not be biased towards some portion of the set. Finally, due to limitations on NLP libraries and late clearance on multi-lingual tokenization models such as mBERT, the reviews are limited to those tagged as “English”. As such, a pre-filtered dataset was to be created to solve this hurdle and accommodate future analysis. The largest subset that remained computationally feasible to operate on and satisfy these requirements contained a total of  2 million reviews. It contains a class split of 70/30 on positive and negative reviews, allowing it to still reflect the real data. The following features describe each review in the dataset:
+
+- **voted_up**: Target variable, a 0-1 value indicating whether the review is positive or negative
+
+- **game**: The name of the game being reviewed
+
+- **review**: The raw text of the review
+
+- **author_steamid**: A unique identifier for the reviewer
+
+- **author_num_games_owned**: The total number of games the reviewer owns
+
+- **author_num_reviews**: The total number of reviews written by the reviewer
+
+- **author_playtime_forever**: The reviewer's total playtime in minutes
+
+- **author_playtime_last_two_weeks**: The reviewer's playtime in the last two weeks
+
+- **author_playtime_at_review**: The playtime at the time of writing
+
+- **votes_up**: The number of users who found the review helpful
+
+- **votes_funny**: The number of users who found the review funny
+
+- **weighted_vote_score**: Steam's internal helpfulness score
+
+- **comment_count**: The number of comments on the review
+
+- **steam_purchase**: 0-1 value indicating if the game was purchased on Steam
+
+- **received_for_free**: 0-1 value indicating if the reviewer received the game for free
+
+- **written_during_early_access**: 0-1 value indicating if the review was written during early access
+
+- **language**: The language the review was written in
+
+- **timestamp_created**: The timestamp the review was published
+
+- **timestamp_updated**: The timestamp the review was last edited
+
+
 ## Data Pre-processing
 
-Some issues to consider to be included:
-- Are there missing values in your data? Is there any pattern in whether or not a particular value is missing? How will the missing values be dealt with? 
+Data preprocessing was implemented in a dedicated PreProcessor class. It was designed to apply a consistent, reproducible pipeline to the raw data before any model training. The pipeline was executed in the following order:
 
-- Are there problems because of data size (rows or columns)? Are some algorithms more affected? Can you come up with any solutions?
+- **Loading the data**: The dataset was loaded from a pre-filtered CSV of 2 million English-only Steam reviews using pandas. A configurable nrows parameter allowed control over the development time of the project.
 
-- If you are doing any clustering, are there clusters in the data? How many? How well separated are they? Do different methods agree on the number of clusters?
+- **Removing uninteresting columns**: Columns with no predictive value were removed from the dataset. Examples include ID values such as recommendationId, appId, as well as region-specific data such as hidden_in_steam_china.
 
-- Is scaling of the variables an issue? For what methods?
+- **Filtering English reviews**: Despite the source dataset being pre-filtered to English reviews, an additional language filter was applied to ensure no non-English reviews remained. This allows for future users to be able to use the project without a pre-filtered dataset, or for testing of larger sample sizes that have not been fully filtered.
 
-- Are there outliers in the data? How did you deal with them? 
+- **Removing reviews with no playtime**: Any review from an author with no total playtime was removed. Such a review likely represented a review written without any meaningful experience of the game.
 
-- Does transforming the data simplify any analysis?
+- **Removing playtime outliers**: A limit on the total number of hours an author had was applied to remove extremely high values, likely representing automated accounts or data entry errors.
+
+- **Removing duplicate reviews**: Duplicate reviews from the same author on the same game were removed, retaining the most recent review if duplicates exist. This prevented the same opinion from being represented multiple times in the dataset.
+
+- **Text cleaning**: The review text was standardized for future tokenization. URLs were removed, Steam-specific tags (e.g [spoiler]) were removed while keeping the text associated with them, as well as special characters like emojis, and finally, excess whitespace was normalized. This ensured consistent input for text-based models.
+
+- **Removing empty reviews**: After text cleaning, if any reviews were left empty or contained only whitespace, they were removed to prevent text-based models from having no input for a given review.
+
+- **Handling missing numeric values**: Remaining missing values in numeric columns were filled with zero, with the intention of indicating the absence of a feature rather than an unknown value.
+
+- **Handling missing target variable**: Any rows with a missing target variable (voted_up) were dropped in their entirety.
+
+- **Handling timestamps**: Unix timestamp columns were converted to a datetime format to make them human-readable.
+
 
 ## Exploratory Data Analysis and Visualisations 
 
-Some of the steps, included here:
+Initial exploration of the original dataset revealed a class distribution of 86/14 positive to negative, a meaningful imbalance that was countered by the construction of the downsampled, filtered dataset. Processing the initial set included chunking the data into segments, then sampling a quarter of the chunk to allow for the resulting data set to contain data from the entire set. The resulting filtered data set had 2 million entries and a class distribution of 70/30 to prevent naive accuracies over the 80% range. All remaining data exploration, feature selection, training, testing, and evaluation were performed on the filtered dataset
 
-- Data visualization: Data visualization is the process of creating graphs and charts to help you understand the patterns and trends in the data. This step can help you identify outliers and anomalies in the data.
+Of the 2 million entries, it was found that playtime had an extreme right skew. The average total playtime was 7,081 minutes, while the median was 1,959 minutes, with the longest playtime being 1,799,274 minutes. Similarly, playtime at review averaged 7,081 minutes, with a median of 846 minutes, indicating that most people play the game for a significant amount of time after their review. Which makes sense considering that 70% of reviews are positive. 
 
-- Statistical analysis: Statistical analysis involves applying statistical methods to the data to identify patterns, trends, and relationships. This step can help you identify correlations between variables and understand the distribution of the data.
+Review length was also highly right-skewed, with an average of 48.6 words and a median of 13 words; the longest contained 3,988 words. This indicates that the majority of reviews are short and to the point, while a minority include much more depth and detail. 
 
-- Feature selection: Feature selection is the process of selecting the most important variables that will be used in the machine learning model. This step can help you identify which variables are most predictive and which variables can be ignored.
+Regarding the reviewers themselves, an average reviewer writes 34.4 reviews, the median of which is 7, and the largest value is 10,446. Purchase location was largely dominated by games purchased on Steam, which took home 65.8% of the share. 12.5% of reviews were written during early access, and 3.5% of reviewers received the game for free.
 
-- Dimensionality reduction: Dimensionality reduction is the process of reducing the number of variables in the data set. This step can help you reduce the complexity of the model and improve its performance.
+A correlation heatmap (Figure 14) was generated to examine the relationships between numeric features. Notable findings include a mildly positive correlation between weighted_vote_score and votes_up, indicating that Steam’s helpfulness score is influenced by upvotes. Additionally, weighted_vote_score and voted_up show a negative correlation, showing that highly scored reviews tend to be negative. 
 
+## Feature Selection
 
-## Other Related Sections (Optional)
+Feature selection for the models was made by domain knowledge and the results of the exploratory data analysis. The base features correlate to three categories of behaviour from the reviewer/review. The first category is account statistics. This includes the number of games owned and the number of reviews written. The second category is playtime behaviour, with features total playtime, playtime at review, playtime in the last two weeks, and time of last played. The final category consists of review engagement metrics, including helpful votes, funny votes, weighted vote score, comment count, and purchase flags (e.g., received game for free). Three additional engineered features were added to the logistic regression model after analysis revealed that playtime values alone were less impactful than the ratios associated with them. For text-based models, feature selection was handled automatically by either the TF-IDF vectorizer, retaining the 1,000 most frequent terms from the review text, or by the LSTM tokenizer.

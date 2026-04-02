@@ -1,14 +1,17 @@
 # Introduction
 
-See this how you can add a reference, @knuth84.
-
 ## Overview
+The video game industry is one of the largest in the world. Steam is the dominant digital distribution platform for PC gaming. With millions of games and a peak of 41 million concurrent players, Steam is home to an extremely large number of user-generated reviews that influence purchasing decisions. Being able to understand what makes a review negative or positive has great value to both developers trying to make their own successful games and to consumers trying to make informed purchases. 
 
 ### Existing System
 
-## Objectives of Project (Must be clearly, precisely defined and must be covered in the work)
+Currently, Steam does not employ any form of review classification or prediction within its algorithms. Instead, users set their sentiment for their own review, and the accumulation of enough sentiment on a game determines its “grade” on the ratio of positive to negative reviews. Certain extreme grades, such as Overwhelmingly Positive/Negative, are unavailable to grades below a certain review count. As games are reviewed more, they get access to more of the grade scale. 
 
- 
+## Objectives of Project
+
+The goal of the project is to build scalable models that are capable of accurately predicting player sentiment through analysis of the review’s metadata and text. We will perform a comparative model analysis on RandomForest, Logistic Regression, and LSTM models to determine which achieves the right balance of interpretability and accuracy. Linguistic features, such as TF-IDF values per term and Keras word embeddings, will transform unstructured review text into high-dimensional features for sentiment extraction. Features such as a ratio between overall time played and time played at review will be engineered to support model strength. Due to the sheer scale of the platform, we will create a data pipeline capable of processing a significant set of reviews to overcome hardware and NLP processing limitations. Finally, we will apply class-balancing techniques to address the positive skew of the platform, producing a model robust enough to maintain a high recall on negative reviews.
+
+
 
 
 

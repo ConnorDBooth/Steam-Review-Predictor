@@ -6,9 +6,8 @@ project:
     - index.qmd            
 book:
   title: "Final Project Report"  # Change to your title of the project
-  subtitle: Sub-title of the Project. # Change to your sub-title of the project
-  author: "Name of Student(s)"
-  date: May 18, 2025
+  author: "Connor Booth, Filip Droka"
+  date: April 1st, 2026
   reader-mode: true
   page-footer:
     left: |

@@ -1,22 +1,50 @@
 # Results
 
-To compare different machine learning models in the results section, here are some steps to consider:
-
 ## Description of the Models
 
-Start by providing a brief description of each model, including its purpose, algorithm type, and any relevant parameters or features used.
+To establish a comprehensive understanding of player sentiment, our project evaluated three distinct classification pipelines.
+
+### Logistic Regression
+
+Serving as the statistical baseline, this model was implemented using a Newton-CG solver. Two variants were tested. One utilized engineered metadata (e.g, playtime_ratio, votes_ratio, review_length) scaled via StandardScaler, and another utilized text-based TF-IDF vectorization capped to 1000 maximum features. Both applied balancing to the class weight parameter to penalize minority class errors.
+
+### Random Forest
+
+An ensemble tree-based algorithm with 100 estimators selected to capture non-linear interactions within the author’s metadata without the need for strict feature scaling
+
+### LSTM
+
+A sequential deep learning architecture adept at Natural Language Processing (NLP). The input text was padded to sequences of 100 tokens, mapped into a dense vector space via an Embedding layer (configured for a 2000-word vocabulary), and processed through an LSTM layer to capture temporal context before outputting a binary probability via a dense sigmoid layer
 
 ## Performance Metrics
 
-Describe the performance metrics used to evaluate the models, such as RMSE, MSE, accuracy, precision, recall, F1 score, or area under the receiver operating characteristic curve (AUC-ROC), etc based on the model class.
+Because the objective of this project is based on classification (predicting the categorical voted_up target variable), continuous regression metrics such as MSE (Mean Squared Error) and RMSE (Root Mean Squared Error) are incompatible. We instead opt for classification-specific metrics capable of being computed by Scikit-Learn. 
+Accuracy - The overall percentage of correctly predicted sentiments by the model.
+Precision - The proportion of predicted negative reviews by the model that were actual negative reviews.
+Recall/Sensitivity - The model’s ability to successfully identify true cases. With the class imbalance present, particular emphasis was to be placed on the Recall/Sensitivity of the negative class to ensure the models did not default to the majority class.
+F1-Score - The harmonic mean of precision and recall. 
+ROC-AUC - The Area Under the Receiver Operating Characteristic Curve was calculated specifically for the Long Short-Term Memory (LSTM) model to evaluate its performance across all classification thresholds based on its continuous probability outputs
+
 
 ## Results Table
 
-Create a results table that presents the performance metrics for each model in a clear and concise format. The table should include the name of the model, the performance metric, and the value of the metric. It can also be helpful to include the standard deviation or confidence intervals for each metric.
+Table 4.1 summarizes the performance of the classification models on the 20% holdout testing set (X_test), preserving the stratified class distribution
 
 ## Interpretation of the Results 
 
-Provide an interpretation of the results, highlighting any significant differences between the models. Discuss which model performed the best and why, as well as any limitations or potential sources of error.
+The experimental analysis identifies the tuned Long Short-Term Memory (LSTM) model as the superior architecture for this dataset, achieving the highest F1 Score of 0.925~, compared to the second highest of 0.875~. This gap in performance shows that the primary indicator for review sentiment lies in the textual context of the review, rather than behavioural data alone. 
+
+The baseline Logistic Regression model which relied solely on numerical features, achieved an F1-score of 0.784. This indicates that features such as playtime, review length, and weighted vote score do have predictive value; they lack the ability to capture the full picture of the review. This limitation is seen again in the Random Forest model, which despite its ability to model non-linear relationships, only improved to an F1-score of 0.859. Suggesting that increasing model complexity alone is insufficient when the features themselves lack predicting power.
+
+The introduction of TF-IDF features into the Logistic Regression model resulted in a significant performance increase over the baseline with an F1-score of 0.875. This result, along with the feature importance graph (Figure 7), which sees TF-IDF derived features overwhelmingly populate the 50 most influential features, confirm that text based features provide much stronger predictive power than behavioural data. However, TF-IDF captures only word frequency, not the context behind them. As a result, it cannot distinguish between phrases such as “good” and “not good” in turn limiting its ability to fully model sentiment. 
+
+The superior performance of the LSTM model can be attributed to its ability to capture context within text. By processing reviews as ordered sequences rather than independent terms, the LSTM is able to learn patterns and informal language commonly found in Steam reviews. THis allows it to outperform both numerical based models and TF-IDF approaches.
+
+Analysis of the confusion matrices (Figures 1,2,3,4,5,6) further support this idea. The LSTM model has a strong balance between precision and recall, effectively identifying both the majority (positive) and minority (negative) reviews without heavy bias. This indicates that the model is not simply exploiting the class imbalance, but actually learning meaningful linguistic patterns to predict sentiment.
+
+Finally, feature importance analysis from the Logistic Regression model (Figure 7) provides more insight into the role of behavioural features. The three engineered features such as playtime_ratio were some of the most influential predictors in the behavioural only model. This suggests that more engaged or detailed reviews tend to correlate with stronger negative sentiment predictions. With that being said, their predictive power still remains well below that of the contents of the review text.
+
+
 
 ## Visualization
 
@@ -24,7 +52,11 @@ Provide visualizations to support the interpretation of the results, such as bar
 
 ## Sensitivity Analysis
 
-Conduct a sensitivity analysis to test the robustness of the models. This can involve varying the parameters or features used in the models and re-evaluating their performance.
+To verify the robustness of our architectures, sensitivity analyses were conducted via systematic hyperparameter tuning loops targeting model complexity:
+RandomizedSearchCV was employed on the Random Forest model using a 3-fold cross-validation setup to assess its sensitivity to tree depth and split criteria. By varying n_estimators, max_depth, and min_samples_split, we observed that the Random Forest model was highly sensitive to unconstrained growth. The optimal architecture was identified at n_estimators = 50, max_depth = 30, min_samples_split = 2 (using sqrt for max features). These constraints prevented the ensemble from over-partitioning the noisy metadata space, yielding a peak cross-validated F1-score of 0.8603, which generalized to 0.859 on the holdout set.
+A custom tuning loop evaluated the LSTM deep learning model across 10 discrete trials of varying architectural complexities. The search randomly combined lstm_units (16 to 128), embedding_dim (32 to 100), batch_size (32 to 128), and epochs (5 and 10). 
+
+The experimental results highlighted a strict bias-variance trade-off regarding the number of training epochs. Architectures trained for 10 epochs consistently stagnated around F1-scores of 0.91. Training the network beyond the 5-epoch mark increased its sensitivity to the specific noise in the training set, causing validation performance to plateau or degrade. The optimal configuration was identified to be lstm_units = 64, embedding_dim = 100, batch_size = 64, epochs = 5. This combination provided the best balance of sequence memory capacity and generalization, achieving the project’s highest overall F1-score of 0.924~.
 
 
 

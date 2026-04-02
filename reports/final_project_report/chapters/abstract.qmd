@@ -1,24 +1,7 @@
 # Abstract {.unnumbered}
 
- 
-The online gaming platform Steam allows players to post reviews indicating whether or not they 
-recommend a game. These reviews can provide a potential buyer with more information regarding others 
-satisfaction and engagement. For developers, understanding the factors that influence whether a player 
-recommends a game can help them gain insight into what their own game needs to be successful. This 
-project will investigate whether review characteristics can predict whether a player will recommend a 
-game.  
-The objective of this project is to build and evaluate machine learning models that predict 
-whether a steam review is marked as “recommended” based on player behaviour and review 
-characteristics. Player behaviours include total playtime, recent activity, and community engagement 
-metrics. In addition, the project will explore whether text-derived features from the review can improve 
-prediction accuracy or detect potentially misleading reviews. Such as a review which is sarcastic or has 
-negative undertones, but is officially marked as positive.  
-The methodology involves several machine learning techniques commonly used for classification 
-tasks. After preprocessing the dataset, Natural Language Processing (NLP) techniques will be applied to 
-review the text to extract numerical features, such as review length and sentiment scores, which aim to 
-capture the tone of the written review. These text-based features will be combined with behaviour 
-variables, such as total play time. The data will then be split into train and test sets. Multiple classification 
-models will be trained, and performance will be compared.  
-The dataset being used is the [Steam Reviews dataset](https://www.kaggle.com/datasets/kieranpoc/steam-reviews/data) found on Kaggle. This dataset contains 
-millions of user reviews and associated behavioural features. The large size of the dataset will allow our 
-models to be trained on a large amount of real player feedback, increasing the reliability of the analysis.
+The online gaming platform Steam allows players to post reviews indicating whether or not they recommend a game. These reviews can provide a potential buyer with more information regarding others' satisfaction and engagement. For developers, understanding the factors that influence whether a player recommends a game can help them gain insight into what their game needs to succeed. This project investigates whether player behaviour and review text can accurately predict Steam review sentiment
+
+A dataset of 2 million English-language reviews was constructed from a publicly available collection of over 100 million Steam reviews, found on Kaggle. The dataset features a 70/30 positive to negative class split. Four classification models were developed and compared. These models include, a baseline Logistic Regression model, an extended TF-IDF Logistic Regression model, a Random Forest classifier, and a Long Short-Term Memory (LSTM) neural network. All models were evaluated using a combination of metrics: accuracy, precision, recall, and F1 score, along with a collection of visualizations. 
+
+The results indicate a clear structure in performance. The baseline Logistic Regression model achieved an F1-score of 0.784, while the extended TF-IDF version improved upon this to raise the F1-score to 0.875. The Random Forest model achieved a score of 0.860, and the tuned LSTM model had the best performance with a score of 0.925. These results indicate that while player behaviour is capable of producing a decent model, the strongest predictor of sentiment lies in the text contents of the review. 
