@@ -31,13 +31,13 @@ ROC-AUC - The Area Under the Receiver Operating Characteristic Curve was calcula
 Table 4.1: Model performance comparison on test data.
 
 | Model                         | Accuracy | Precision | Recall | F1-Score |
-|------------------------------|----------|-----------|--------|----------|
-| Logistic Regression          | 0.716    | 0.840     | 0.734  | 0.784    |
-| Logistic Regression (TF-IDF) | 0.834    | 0.921     | 0.835  | 0.876    |
-| Random Forest                | 0.795    | 0.824     | 0.898  | 0.860    |
-| Tuned Random Forest          | 0.797    | 0.830     | 0.892  | 0.861    |
-| LSTM                         | 0.891    | 0.937     | 0.905  | 0.921    |
-| Tuned LSTM                   | 0.896    | 0.936     | 0.914  | 0.925    |
+|:------------------------------|---------:|----------:|-------:|---------:|
+| Logistic Regression (Metadata/Naive) | 0.7161 | 0.8400 | 0.7344 | 0.7836 |
+| Logistic Regression (TF-IDF)         | 0.8339 | 0.9206 | 0.8348 | 0.8756 |
+| Random Forest (Default)              | 0.7945 | 0.8240 | 0.8983 | 0.8596 |
+| Random Forest (Tuned)                | 0.7965 | 0.8300 | 0.8921 | 0.8599 |
+| LSTM (Default)                       | 0.8908 | 0.9367 | 0.9051 | 0.9207 |
+| LSTM (Tuned)                         | 0.8962 | 0.9359 | 0.9144 | 0.9250 |
 
 Table 4.1 summarizes the performance of the classification models on the 20% holdout testing set (X_test), preserving the stratified class distribution
 
