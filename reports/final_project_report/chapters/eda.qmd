@@ -76,7 +76,9 @@ Initial exploration of the original dataset revealed a class distribution of 86/
 
 Of the 2 million entries, it was found that playtime had an extreme right skew. The average total playtime was 7,081 minutes, while the median was 1,959 minutes, with the longest playtime being 1,799,274 minutes. Similarly, playtime at review averaged 7,081 minutes, with a median of 846 minutes, indicating that most people play the game for a significant amount of time after their review. Which makes sense considering that 70% of reviews are positive. 
 
-Review length was also highly right-skewed, with an average of 48.6 words and a median of 13 words; the longest contained 3,988 words. This indicates that the majority of reviews are short and to the point, while a minority include much more depth and detail. 
+![The distribution of review lengths on a sample of the reviews](chapters/worddist.png){#fig-worddist}
+
+Review length was also highly right-skewed, with an average of 48.6 words and a median of 13 words; the longest contained 3,988 words (@fig-worddist). This indicates that the majority of reviews are short and to the point, while a minority include much more depth and detail. 
 
 Regarding the reviewers themselves, an average reviewer writes 34.4 reviews, the median of which is 7, and the largest value is 10,446. Purchase location was largely dominated by games purchased on Steam, which took home 65.8% of the share. 12.5% of reviews were written during early access, and 3.5% of reviewers received the game for free.
 

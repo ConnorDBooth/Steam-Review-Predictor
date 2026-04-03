@@ -10,11 +10,11 @@ Serving as the statistical baseline, this model was implemented using a Newton-C
 
 ### Random Forest
 
-An ensemble tree-based algorithm with 100 estimators selected to capture non-linear interactions within the author’s metadata without the need for strict feature scaling
+An ensemble tree-based algorithm with 100 estimators selected to capture non-linear interactions within the author’s metadata, without the need for strict feature scaling.
 
 ### LSTM
 
-A sequential deep learning architecture adept at Natural Language Processing (NLP). The input text was padded to sequences of 100 tokens, mapped into a dense vector space via an Embedding layer (configured for a 2000-word vocabulary), and processed through an LSTM layer to capture temporal context before outputting a binary probability via a dense sigmoid layer
+A sequential deep learning architecture adept at Natural Language Processing (NLP). The input text was padded to sequences of 100 tokens, mapped into a dense vector space via an Embedding layer (configured for a 2000-word vocabulary), and processed through an LSTM layer to capture temporal context before outputting a binary probability via a dense sigmoid layer.
 
 ## Performance Metrics
 
@@ -49,17 +49,11 @@ The baseline Logistic Regression model which relied solely on numerical features
 
 The introduction of TF-IDF features into the Logistic Regression model resulted in a significant performance increase over the baseline with an F1-score of 0.875. This result, along with the feature importance graph (@fig-logistic-tfidffeatureimportance), which sees TF-IDF derived features overwhelmingly populate the 50 most influential features, confirm that text based features provide much stronger predictive power than behavioural data. However, TF-IDF captures only word frequency, not the context behind them. As a result, it cannot distinguish between phrases such as “good” and “not good” in turn limiting its ability to fully model sentiment. 
 
-The superior performance of the LSTM model can be attributed to its ability to capture context within text. By processing reviews as ordered sequences rather than independent terms, the LSTM is able to learn patterns and informal language commonly found in Steam reviews. THis allows it to outperform both numerical based models and TF-IDF approaches.
+The superior performance of the LSTM model can be attributed to its ability to capture context within text. By processing reviews as ordered sequences rather than independent terms, the LSTM is able to learn patterns and informal language commonly found in Steam reviews. This allows it to outperform both numerical based models and TF-IDF approaches.
 
 Analysis of the confusion matrices (@fig-logistic-confusion, @fig-logistic-tfidfconfusion, @fig-rf-confusion, @fig-rftuned-confusion, @fig-LSTM-confusion, @fig-tunedLSTM-confusion) further support this idea. The LSTM model has a strong balance between precision and recall, effectively identifying both the majority (positive) and minority (negative) reviews without heavy bias. This indicates that the model is not simply exploiting the class imbalance, but actually learning meaningful linguistic patterns to predict sentiment.
 
 Finally, feature importance analysis from the Logistic Regression model (@fig-logistic-featureimportance) provides more insight into the role of behavioural features. The three engineered features such as playtime_ratio were some of the most influential predictors in the behavioural only model. This suggests that more engaged or detailed reviews tend to correlate with stronger negative sentiment predictions. With that being said, their predictive power still remains well below that of the contents of the review text.
-
-
-
-## Visualization
-
-Provide visualizations to support the interpretation of the results, such as bar charts or box plots. These can help to illustrate the differences between the models and make the results more accessible to readers.
 
 ## Sensitivity Analysis
 

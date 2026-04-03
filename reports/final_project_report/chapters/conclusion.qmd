@@ -24,7 +24,7 @@ The development process highlighted several hurdles.
 
 **Feature Lag**: Metadata like playtime_at_review is a “snapshot” that may not reflect the player’s current sentiment, especially for live-service games that evolve.
 
-**LSTM Early Dropout**: While the hyperparameters were tuned to lower epoch models, compute time could have been saved by dropping out of model training early once overfitting was detected.
+**LSTM Early Stopping**: While the hyperparameters were tuned to lower epoch models, compute time could have been saved by dropping out of model training early once overfitting was detected.
 
 
 ## Future Considerations
