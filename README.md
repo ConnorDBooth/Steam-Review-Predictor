@@ -1,12 +1,40 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/hlUG2xa0)
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=23083680&assignment_repo_type=AssignmentRepo)
-Project Instructions
-==============================
+# Steam Review Sentiment Classifier
 
-This repo contains the instructions for a machine learning project. 
+A machine learning pipeline that classifies Steam game reviews as **positive** or **negative** — built as a course project for CP-322 (Machine Learning) at Wilfrid Laurier University.
 
-**Do Not Forget to mention the Python Version being used and complete the requirements.txt fil**
+---
 
+## What It Does
+
+Given a Steam review like *"10/10 would die again"*, the model predicts whether it's a positive or negative review. We trained and compared four models across two feature representations to see what actually works best on messy, informal game review text.
+
+---
+
+## Models & Results
+
+| Model | Features | F1 Score |
+|---|---|---|
+| Logistic Regression | Numeric | **0.7836** |
+| Logistic Regression | TF-IDF | **0.8756** |
+| Random Forest | TF-IDF | **0.8599** |
+| LSTM | Sequential text | **0.9250** |
+
+> The LSTM edged out TF-IDF + LR in F1, but the gap was surprisingly small for the added complexity.
+
+## Stack
+
+- **Python** — scikit-learn, pandas, Keras/TensorFlow
+- **Models** — Logistic Regression, Random Forest, LSTM
+- **Features** — TF-IDF vectors, numeric review features, sequential embeddings
+- **Report** — Quarto (rendered to PDF)
+
+---
+## Authors
+
+- **Connor Booth** — [github.com/ConnorDBooth](https://github.com/ConnorDBooth)
+- **Filip Droca**
+
+Built for CP-322 · Wilfrid Laurier University
 Project Organization
 ------------
 
